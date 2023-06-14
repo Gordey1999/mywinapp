@@ -1,0 +1,41 @@
+.files-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.files__item {
+    width: 10%;
+    min-width: 100px;
+    /* aspect-ratio: 15 / 21; */
+    flex: 1 0 auto;
+    margin: 1px;
+    display: flex;
+    flex-direction: column;
+}
+.files__item:hover {
+    opacity: 0.6;
+}
+.files__item.directory {
+    min-height: 100px;
+    justify-content: flex-end;
+    background: #add1db;
+}
+
+.files__item-title {
+    font-family: system-ui;
+    color: white;
+    background: black;
+    width: 100%;
+    padding: 0 5px;
+    box-sizing: border-box;
+    height: 1.2em;
+    line-height: 1em;
+    overflow: hidden;
+}
+
+.files__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
