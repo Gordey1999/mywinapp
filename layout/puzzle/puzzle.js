@@ -77,6 +77,12 @@ $(function() {
     window.api.receive('puzzleGetImageResult', (img, initStyles, index) => {
         getImageItems[index](img, initStyles);
     })
+    let imagesQueue = [];
+    setInterval(function() {
+        if (imagesQueue.length) {
+            imagesQueue.shift()();
+        }
+    }, 100);
 
     function loadImages()
     {
@@ -123,7 +129,10 @@ $(function() {
                     });
             });
 
-            window.api.send('puzzleGetImage', $this.data('size'), data.pieceWidth, ++getImageIndex, imgId);
+            const index = ++getImageIndex;
+            imagesQueue.push(function() {
+                window.api.send('puzzleGetImage', $this.data('size'), data.pieceWidth, index, imgId);
+            });
 
         });
     }
