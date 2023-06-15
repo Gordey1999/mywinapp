@@ -39,6 +39,7 @@ app.on('window-all-closed', () => {
 
 const fs = require('fs')
 const indexFiles = require("./lib/indexFiles");
+const detail = require("./lib/detail");
 
 function isImage(file) {
     return file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.jpeg')
@@ -110,6 +111,10 @@ ipcMain.on("openIndexFiles", (event, dirPath) => {
 ipcMain.on('openDetail', (event, selectedId) => {
     const detail = require('./lib/detail');
     detail(win, activeFiles, selectedId);
+})
+ipcMain.on('openPuzzle', (event) => {
+    const detail = require('./lib/puzzle');
+    detail(win);
 })
 
 

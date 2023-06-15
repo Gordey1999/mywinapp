@@ -1,24 +1,24 @@
 
 const { contextBridge, webFrame, ipcRenderer } = require('electron')
-//const fs = require('fs')
+
 
 contextBridge.exposeInMainWorld('api', {
-    send: (channel, data) => {
+    send: (channel, ...data) => {
         // whitelist channels
-        let validChannels = ['sectionList', 'itemList', 'openDetail', 'organizeDir', 'openIndexFiles', 'openPuzzle'];
+        let validChannels = ['closePuzzle', 'puzzleGetBlock', 'puzzleGetImage'];
         if (validChannels.includes(channel)) {
-            ipcRenderer.send(channel, data);
+            ipcRenderer.send(channel, ...data);
         }
     },
     receive: (channel, func) => {
-        let validChannels = ['sectionListResult', 'itemListResult', 'previewResult', 'setSelected', 'organizeDirResult'];
+        let validChannels = ['puzzleGetBlockResult', 'puzzleGetImageResult'];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender`
             ipcRenderer.on(channel, (event, ...args) => func(...args));
         }
-    }
+    },
 })
 
 window.addEventListener('DOMContentLoaded', () => {
-    webFrame.setVisualZoomLevelLimits(1, 4);
+    //webFrame.setVisualZoomLevelLimits(1, 4)
 })

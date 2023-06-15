@@ -284,10 +284,12 @@ window.api.receive('sectionListResult', (sections) => {
 (function() {
     const btnOrganize = document.querySelector('.js-organize-dir');
     const btnIndexFiles = document.querySelector('.js-index-files');
+    const btnPuzzle = document.querySelector('.js-puzzle');
 
     btnOrganize.addEventListener('click', () => {
         if (!confirm('sure?')) return;
 
+        return;
         window.api.send('organizeDir', currentDir)
     })
     window.api.receive('organizeDirResult', () => {
@@ -296,5 +298,8 @@ window.api.receive('sectionListResult', (sections) => {
 
     btnIndexFiles.addEventListener('click', () => {
         window.api.send('openIndexFiles');
+    })
+    btnPuzzle.addEventListener('click', () => {
+        window.api.send('openPuzzle');
     })
 })()

@@ -1,0 +1,135 @@
+body {
+    background: #303030;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+.puzzleContainer {
+    position: static;
+}
+.puzzleElement {
+    position: absolute;
+    /*border-bottom: 1px solid white;*/
+    border: 1px solid rgba(0, 0, 0, 0);
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: opacity 1s;
+}
+.puzzleElement.loaded {
+    border: 1px solid #cfcfcf;
+    transition: border cubic-bezier(1, 0.03, 1, 1) 1s;
+}
+.puzzleElement img {
+    object-fit: cover;
+    position: absolute;
+}
+.puzzleElement img.horizontal {
+    top: 0;
+    width: fit-content;
+    height: 100%;
+    transition: left 2s;
+}
+.puzzleElement img.vertical {
+    left: 0;
+    width: 100%;
+    height: fit-content;
+    transition: top 2s;
+}
+
+.imageBlock {
+    position: absolute;
+}
+
+.contextMenu {
+    display: none;
+    width: 250px;
+    opacity: 0;
+    position: absolute;
+    z-index: 1000;
+    background: #404040;
+    color: white;
+    padding: 10px 0;
+    border-radius: 10px;
+    box-shadow: 0 0 20px 6px #00000045;
+    transition: opacity 0.5s;
+}
+
+.contextMenu.active {
+    opacity: 1;
+}
+
+
+.menuButton {
+    width: 100%;
+    padding: 10px 20px;
+    font-family: system-ui;
+    cursor: pointer;
+    transition: 0.3s;
+    box-sizing: border-box;
+}
+
+.menuButton:hover {
+    padding-left: 30px;
+    background: rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+}
+.menuButton:active {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.buttonGroup {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+}
+
+.buttonGroup .menuButton {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.buttonGroup .menuButton:hover {
+    padding: 10px 10px;
+}
+
+.puzzleElement.selected {
+    z-index: 100;
+    opacity: 1 !important;
+    transition: 0.5s;
+}
+.puzzleContainer.hide .puzzleElement {
+    opacity: 0.4;
+    transition: 0.5s;
+}
+
+
+body {
+    --cell-width1: 100px;
+    --cell-height1: 100px;
+    --cell-width2: 100px;
+    --cell-height2: 100px;
+    --cell-width3: 100px;
+    --cell-height3: 100px;
+    --cell-width4: 100px;
+    --cell-height4: 100px;
+}
+
+.puzzleSize1 {
+    width: var(--cell-width1);
+    height: var(--cell-height1);
+}
+.puzzleSize2 {
+    width: var(--cell-width2);
+    height: var(--cell-height2);
+}
+.puzzleSize3 {
+    width: var(--cell-width3);
+    height: var(--cell-height3);
+}
+.puzzleSize4 {
+    width: var(--cell-width4);
+    height: var(--cell-height4);
+}
+
