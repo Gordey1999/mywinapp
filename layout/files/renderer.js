@@ -1,7 +1,7 @@
 "use strict";
 
 import { KeyboardController } from "../js/keyboard.js";
-import { createNode, scrollToElement } from "../js/tools.js";
+import {addScrollbar, createNode, scrollToElement} from "../js/tools.js";
 import { SectionList } from "./sections.js";
 
 const itemsInRow = 10;
@@ -37,41 +37,33 @@ class FileItem {
     #bind() {
         this.#el.addEventListener("click", this.#onClick.bind(this));
         this.#el.addEventListener("dblclick", this.#onDbClick.bind(this));
-        //this.el.addEventListener("mouseover", this.onMouseOver.bind(this));
-        //this.el.addEventListener("mouseleave", this.onMouseLeave.bind(this));
     }
 
     #onDbClick(e) {
         e.preventDefault();
-        window.api.send('openDetail', this.#file.id);
+        this.#controller.onItemDbClick(this.#file.id);
     }
 
     #onClick() {
-        window.keyboardController.setActiveBlock(this.#controller);
-        this.#controller.select(this);
-        if (!this.#preview)
-            this.#showPreview();
-        else {
-            this.#clearPreview();
-        }
+        this.#controller.onItemClick(this.#file.id);
     }
 
-    #showPreview() {
+    showPreview() {
         if (this.#preview) { return; }
         this.#preview = new FilePreview(this);
     }
 
-    #startPreview() {
+    startPreview() {
         if (this.#preview) { return; }
 
-        this.#clearPreview();
+        this.clearPreview();
         this.#timer = setTimeout(() => {
-            this.#showPreview();
+            this.showPreview();
             this.#timer = null;
         }, 800);
     }
 
-    #clearPreview() {
+    clearPreview() {
         if (this.#preview) {
             this.#preview.destroy();
             this.#preview = null;
@@ -81,33 +73,23 @@ class FileItem {
             this.#timer = null;
         }
     }
+    togglePreview() {
+        this.#preview ? this.clearPreview() : this.showPreview();
+    }
 
     getXIndex() {
-        return controller.getFileIndex(this.#file.id) % itemsInRow;
+        return this.#controller.getItemIndex(this.#file.id) % itemsInRow;
     }
     getYIndex() {
-        return controller.getFileIndex(this.#file.id) / itemsInRow;
-    }
-
-    markSelected(b) {
-        if (b) {
-            this.#startPreview();
-            this.#el.classList.add('selected');
-            scrollToElement(this.#el);
-        } else {
-            this.#clearPreview();
-            this.#el.classList.remove('selected');
-        }
+        return this.#controller.getItemIndex(this.#file.id) / itemsInRow;
     }
 
     setPreview(path) {
         this.#img.src = path;
     }
-
     getElement() {
         return this.#el;
     }
-
     getFile() {
         return this.#file;
     }
@@ -182,14 +164,12 @@ class FilesController {
     #el = null;
     #items = null;
     #filesPos = null;
-    #selected = null;
+    #pointer = null;
 
     constructor(container) {
         this.#el = container;
 
         this.#items = [];
-
-        this.#bind();
     }
 
     setFiles(files) {
@@ -206,9 +186,29 @@ class FilesController {
             this.#filesPos[file.id] = index;
             index++;
         })
+
+        if (files.length) {
+            window.keyboardController.addBlock(this, this.#el.querySelectorAll('.files__item'))
+        } else {
+            window.keyboardController.removeBlock(this);
+        }
     }
 
-    getFileIndex(id) {
+    onItemClick(id) {
+        const index = this.getItemIndex(id);
+        window.keyboardController.pointTo(this, index);
+        this.#pointer.togglePreview();
+    }
+    onItemDbClick(id) {
+        this.openDetail(id);
+    }
+    onKeyboardEvent(event, i) {
+        if (event === 'enter') {
+            this.openDetail(this.#items[i].getFile().id);
+        }
+    }
+
+    getItemIndex(id) {
         return this.#filesPos[id];
     }
 
@@ -220,72 +220,22 @@ class FilesController {
         }
     }
 
-    #bind() {
-        //document.addEventListener('keydown', this.onKeyDown.bind(this));
+    openDetail(id) {
+        window.api.send('openDetail', id);
     }
 
-    onKeyboardEvent(event, controller) {
-        if (!this.#items.length) { /*window.keyboardController.gotoTop(); return;*/ }
-
-        const iSel = this.getSelectedIndex();
-        let max = this.#items.length - 1;
-
-        let iNew = null;
-
-        if (event === 'entryTop' || event === 'home') {
-            iNew = 0;
-        } else if (event === 'entryBottom' || event === 'end') {
-            iNew = max;
-        } else if (event === 'up') {
-            if (iSel < itemsInRow) {
-                controller.gotoTop();
-                return;
-            }
-            iNew = iSel - itemsInRow;
-        } else if (event === 'down') {
-            if (iSel > max - itemsInRow) {
-                controller.gotoBottom();
-                return;
-            }
-            iNew = iSel + itemsInRow;
-        } else if (event === 'left') {
-            iNew = Math.max(0, iSel - 1);
-        } else if (event === 'right') {
-            iNew = Math.min(max, iSel + 1);
-        } else if (event === 'enter') {
-            window.api.send('openDetail', this.#items[iSel].getFile().id);
-        } else if (event === 'leave') {
-            this.select(null);
+    onSetPointer(i) {
+        if (this.#pointer) {
+            this.#pointer.clearPreview();
         }
-
-        if (iNew !== null) {
-            this.select(this.#items[iNew]);
-        }
-    }
-
-    select(item) {
-        if (this.#selected) {
-            if (this.#selected === item) {
-                return;
-            }
-            this.#selected.markSelected(false);
-        }
-        if (item === null) {
-            this.#selected = null;
-            return;
-        }
-
-        this.#selected = item;
-        item.markSelected(true);
+        if (i === null) { return; }
+        this.#pointer = this.#items[i];
+        this.#pointer.startPreview();
     }
 
     selectId(id) {
-        this.select(this.#items[this.getFileIndex(id)]);
-    }
-
-    getSelectedIndex() {
-        if (!this.#selected) return null;
-        return this.getFileIndex(this.#selected.getFile().id);
+        const index = this.getItemIndex(id);
+        window.keyboardController.pointTo(this, index);
     }
 
     getContainer() {
@@ -304,10 +254,11 @@ const sectionsContainer = document.querySelector('.sections');
 window.api.receive('sectionListResult', (sections) => {
     sectionsContainer.innerHTML = '';
 
+    window.keyboardController = new KeyboardController();
+
     const sectionList = new SectionList(sectionsContainer, [{ name: 'root', chain: '', children: sections}]);
 
     const controller = new FilesController(container);
-    window.keyboardController = new KeyboardController([sectionList, controller]);
 
 
     window.api.receive('itemListResult', (files) => {
