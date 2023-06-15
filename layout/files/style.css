@@ -135,3 +135,40 @@ html ::-webkit-scrollbar {
 html {
     user-select: none;
 }
+
+.scrollbar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 28px;
+}
+.scrollbar__line {
+    position: absolute;
+    height: calc(100% - 20px);
+    width: 8px;
+    margin: 10px;
+    transition: all 500ms;
+}
+.scrollbar:hover .scrollbar__line {
+    margin: 10px 5px;
+    width: 18px;
+}
+
+.scrollbar__bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: rgb(163 163 163);
+    border-radius: 8px;
+    box-shadow: 0 0 20px 10px #00000085;
+    opacity: 0;
+    transition: opacity 500ms;
+    cursor: pointer;
+}
+
+.scrollbar:hover .scrollbar__bar {
+    opacity: 1;
+}

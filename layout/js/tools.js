@@ -38,3 +38,72 @@ export function getAbsPosition(el) {
         top: rect.top + halfH + window.scrollY
     };
 }
+
+export function createScrollbar(el) {
+    new Scrollbar(el);
+}
+
+class Scrollbar {
+    #container = null;
+    #el = null;
+    #line = null;
+    #bar = null;
+    #timer = null;
+
+    constructor(el) {
+        this.#container = el;
+
+        this.#make();
+
+        this.#bind();
+    }
+
+    #make() {
+        this.#el = createNode('div', 'scrollbar', this.#container);
+        this.#line = createNode('div', 'scrollbar__line', this.#el);
+        this.#bar = createNode('div', 'scrollbar__bar', this.#line);
+    }
+
+    #bind() {
+        if (this.#container === document.body) {
+            document.addEventListener('scroll', this.#onScroll.bind(this));
+        } else {
+            this.#container.addEventListener('scroll', this.#onScroll.bind(this));
+        }
+    }
+
+    #onScroll(e) {
+
+        const scroll = document.documentElement.scrollTop;
+        const viewportHeight = window.innerHeight; // equals document.documentElement.clientHeight
+        const docHeight = document.documentElement.scrollHeight;
+
+        const elHeight = this.#line.offsetHeight;
+        let barHeight = viewportHeight / docHeight * elHeight;
+        let offset = scroll / docHeight * elHeight;
+
+        const minBarHeight = 50;
+
+        if (barHeight < minBarHeight) {
+            barHeight = minBarHeight;
+            offset = (scroll + viewportHeight / 2) / docHeight * (elHeight - minBarHeight);
+        }
+
+        this.#bar.style.height = barHeight + 'px';
+        this.#bar.style.top = offset + 'px';
+        this.#bar.style.opacity = 1;
+
+        this.#startTimer();
+    }
+
+    #startTimer() {
+        if (this.#timer) {
+            clearTimeout(this.#timer);
+        }
+        this.#timer = setTimeout(this.#onTimer.bind(this), 1000);
+    }
+
+    #onTimer() {
+        this.#bar.style.removeProperty('opacity');
+    }
+}

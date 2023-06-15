@@ -1,7 +1,7 @@
 "use strict";
 
 import { KeyboardController } from "../js/keyboard.js";
-import {addScrollbar, createNode, scrollToElement} from "../js/tools.js";
+import { createScrollbar, createNode, scrollToElement } from "../js/tools.js";
 import { SectionList } from "./sections.js";
 
 const itemsInRow = 10;
@@ -243,7 +243,7 @@ class FilesController {
     }
 }
 
-
+createScrollbar(document.body);
 
 
 window.api.send('sectionList');
