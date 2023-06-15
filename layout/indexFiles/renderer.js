@@ -1,22 +1,35 @@
 
-window.api.receive('imagesListResult', (images) => {
+(function() {
 
-    const container = document.querySelector('.images-container')
-    container.innerHTML = '';
+    const fieldCount = document.querySelector('.js-count');
+    const fieldAdded = document.querySelector('.js-added');
+    const fieldMessage = document.querySelector('.js-message');
 
-    images.forEach(image => {
-        const item = document.createElement('div')
-        item.classList.add('images__item')
+    let stop = true;
 
-        const img = document.createElement('img')
-        img.src = image
-        img.loading = 'lazy';
-        item.append(img);
+    document.querySelector('.js-start').addEventListener('click', () => {
+        if (!stop) return;
+        stop = false;
+        window.api.send('indexFilesStep');
+    });
 
-        container.append(item)
-    })
-})
-window.api.send('imagesList');
+    document.querySelector('.js-stop').addEventListener('click', () => {
+        stop = true;
+    });
 
+    window.api.receive('indexFilesStepResult', (data) => {
+        fieldCount.textContent = data.count;
+        fieldAdded.textContent = data.added;
+        if (data.finished) {
+            fieldMessage.textContent = 'finished!';
+            return;
+        }
+        if (data.message !== null) {
+            fieldMessage.textContent = data.message;
+        }
+        if (data.stepFinished && !stop) {
+            window.api.send('indexFilesStep');
+        }
+    });
 
-//window.api.send("imagesList", null);
+})();

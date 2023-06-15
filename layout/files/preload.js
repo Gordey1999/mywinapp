@@ -3,18 +3,15 @@ const { contextBridge, webFrame, ipcRenderer } = require('electron')
 //const fs = require('fs')
 
 contextBridge.exposeInMainWorld('api', {
-    enableZoom: () => {
-        webFrame.setVisualZoomLevelLimits(1, 4)
-    },
     send: (channel, data) => {
         // whitelist channels
-        let validChannels = ["toMain"];
+        let validChannels = ['sectionList', 'itemList', 'openDetail', 'organizeDir', 'openIndexFiles'];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
         }
     },
     receive: (channel, func) => {
-        let validChannels = ["fromMain"];
+        let validChannels = ['sectionListResult', 'itemListResult', 'previewResult', 'setSelected', 'organizeDirResult'];
         if (validChannels.includes(channel)) {
             // Deliberately strip event as it includes `sender`
             ipcRenderer.on(channel, (event, ...args) => func(...args));
@@ -23,6 +20,7 @@ contextBridge.exposeInMainWorld('api', {
 })
 
 window.addEventListener('DOMContentLoaded', () => {
+    webFrame.setVisualZoomLevelLimits(1, 4)
     const replaceText = (selector, text) => {
         const element = document.getElementById(selector)
         if (element) element.innerText = text

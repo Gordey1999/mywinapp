@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>Detail</title>
+    <title>Index Files</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="images-container">
+<div class="modal">
+    <div>
+        indexed: <span class="js-count"></span><br>
+        added: <span class="js-added"></span><br>
+        <span class="js-message"></span><br>
 
+        <a href="#" class="js-start">start</a>
+        <a href="#" class="js-stop">stop</a>
+    </div>
 </div>
 
 <script src="renderer.js"></script>

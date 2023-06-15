@@ -1,59 +1,38 @@
-window.api.enableZoom();
+window.api.receive('detailInitResult', (files, selectedId) => {
 
-window.api.receive("dirListResult", (files) => {
-    const container = document.querySelector('.files-container')
+    const container = document.querySelector('.container')
     container.innerHTML = '';
 
-    if (files.length > 400)
-        files = files.slice(0, 400);
-
-    files.forEach(file => {
-        const item = document.createElement('div')
-        item.classList.add('files__item')
-        item.dataset.path = file.path;
-
-        if (!file.isDir || file.cover) {
-            const img = document.createElement('img')
-            img.src = file.isDir ? file.cover : file.path
-            item.append(img);
-        }
-
-        if (file.isDir)
-        {
-            item.classList.add('directory')
-            const title = document.createElement('div')
-            title.classList.add('files__item-title')
-            title.innerText = file.name
-            item.append(title)
-
-            item.addEventListener('dblclick', openDir)
-            item.addEventListener('click', onDirClick)
-        }
-
-        container.append(item)
-    })
-});
-window.api.send("dirList", null);
-
-
-function openDir(e) {
-    window.api.send("dirList", e.currentTarget.dataset.path)
-}
-
-function onDirClick(e) {
-    if (e.which !== 2) return
-
-    window.api.send('showDetail', e.currentTarget.dataset.path)
-}
-
-class FilesContainer {
-    constructor() {
-
+    let index = null;
+    for (const i in files) {
+        if (files[i].id === selectedId)
+            index = i;
     }
-}
 
-class FileItem {
-    constructor() {
 
-    }
-}
+    const item = document.createElement('div')
+    item.classList.add('item')
+
+    const img = document.createElement('img')
+    img.src = files[index].src;
+    //img.loading = 'lazy';
+    item.append(img);
+
+    container.append(item);
+
+    document.addEventListener('keydown', (e) => {
+        e.preventDefault();
+        if (e.code === 'KeyD' || e.code === 'ArrowRight') {
+            if (index < files.length - 1)
+                index++;
+            img.src = files[index].src;
+        } else if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+            if (index > 0)
+                index--;
+            img.src = files[index].src;
+        } else if (e.code === 'Escape' || e.code === 'Enter') {
+            window.api.send('closeDetail', files[index].id);
+        }
+    });
+})
+window.api.send('detailInit');

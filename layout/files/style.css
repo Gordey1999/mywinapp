@@ -1,0 +1,137 @@
+body {
+    background: #2c2c2c;
+    font-family: system-ui;
+}
+
+.files-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 100px;
+}
+
+.files__item {
+    width: calc(10% - 4px);
+    aspect-ratio: 1 / 1;
+    /*flex: 1 0 auto;*/
+    margin: 2px;
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+    position: relative;
+}
+.files__item.selected {
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.files__item:hover {
+    /*opacity: 0.6;*/
+    /*box-shadow: 0px 0px 20px 10px #00000085;*/
+    /*z-index: 1;*/
+}
+.files__item:focus {
+    outline: none;
+}
+.files__item.directory {
+    min-height: 100px;
+    justify-content: flex-end;
+    background: #add1db;
+}
+
+.files__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.files__item--preview {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+    box-shadow: 0 0 20px 10px #00000085;
+    border-radius: 8px;
+    transition: width 500ms cubic-bezier(0, 0, 0.2, 1), height 500ms cubic-bezier(0, 0, 0.2, 1),
+        left 500ms cubic-bezier(0, 0, 0.2, 1), transform 500ms cubic-bezier(0, 0, 0.2, 1);
+}
+.files__item.selected .files__item--preview {
+    border: 2px solid #ffffff;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.files__item--preview img {
+
+}
+
+
+.menu {
+    display: flex;
+    margin: 10px 0;
+}
+
+.menu__button {
+    background: #638eff;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.menu__button:hover {
+    background: #376eff;
+}
+
+
+
+.sections {
+    /*max-height: 20px;*/
+    overflow: hidden;
+    transition: max-height 1s ease-out;
+}
+.sections:hover {
+    /*max-height: 3000px;*/
+    transition: max-height 1s ease-out;
+}
+.section {
+    display: flex;
+    color: white;
+    width: 100%;
+    min-width: 206px;
+    margin-bottom: 10px;
+
+    flex-wrap: wrap;
+}
+.section__item {
+    margin: 3px;
+    min-width: fit-content;
+}
+
+.section__item-inner {
+    padding: 0 11px 3px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+.section__item-inner.pointer {
+    border: 2px solid white;
+}
+
+.section__item-inner.active {
+    background-color: #5c74ff;
+}
+
+html ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+html {
+    user-select: none;
+}
