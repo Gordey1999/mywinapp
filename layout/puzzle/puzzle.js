@@ -74,15 +74,18 @@ $(function() {
     let windowHeight = $(window).height();
     let getImageIndex = -1;
     let getImageItems = [];
+	let canGetNext = true;
     window.api.receive('puzzleGetImageResult', (img, initStyles, index) => {
         getImageItems[index](img, initStyles);
+	    canGetNext = true;
     })
     let imagesQueue = [];
     setInterval(function() {
-        if (imagesQueue.length) {
+        if (imagesQueue.length && canGetNext) {
+	        canGetNext = false;
             imagesQueue.shift()();
         }
-    }, 100);
+    }, 200);
 
     function loadImages()
     {
