@@ -8,25 +8,19 @@ const settings = require('./lib/settings');
 
 let win;
 
-// keys: Mousetrap
-
-const createWindow = () => {
-    win = new BrowserWindow({
-        width: 800,
-        height: 600,
-        autoHideMenuBar: true,
-        // frame: false,
-        webPreferences: {
-            preload: path.join(__dirname, 'layout/files/preload.js')
-        }
-    })
-    win.maximize();
-
-    win.loadFile('layout/files/index.html');
-}
-
 app.whenReady().then(() => {
-    createWindow()
+	win = new BrowserWindow({
+		width: 800,
+		height: 600,
+		autoHideMenuBar: true,
+		// frame: false,
+		webPreferences: {
+			preload: path.join(__dirname, 'layout/files/preload.js')
+		}
+	})
+	win.maximize();
+
+	win.loadFile('layout/files/index.html');
 })
 
 app.on('window-all-closed', () => {
@@ -34,21 +28,6 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
 })
 
-
-
-
-const fs = require('fs')
-const indexFiles = require("./lib/indexFiles");
-const detail = require("./lib/detail");
-
-function isImage(file) {
-    return file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.jpeg')
-}
-
-ipcMain.on('imagePreview', (e, file) => {
-    console.log(file);
-    return file.id;
-});
 
 ipcMain.on('sectionList', (event) => {
     const rows = db.prepare('SELECT dir, count(dir) AS cnt FROM files WHERE dir != ? GROUP BY dir ORDER BY dir ASC').all('');
@@ -113,13 +92,14 @@ ipcMain.on('openDetail', (event, selectedId) => {
     detail(win, activeFiles, selectedId);
 })
 ipcMain.on('openPuzzle', (event) => {
-    const detail = require('./lib/puzzle');
-    detail(win);
+    const puzzle = require('./lib/puzzle');
+	puzzle(win);
 })
 
 
 
 
+const fs = require('fs');
 ipcMain.on('organizeDir', (event, currentDir) => {
     const files = fs.readdirSync(currentDir);
     const names = {};
