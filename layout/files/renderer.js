@@ -25,13 +25,20 @@ class FileItem {
 
     #make() {
         this.#el = createNode('div', 'files__item', this.#controller.getContainer());
-        this.#img = createNode('img', null, this.#el);
 
-        if (this.#file.preview !== null) {
-            this.#img.src = this.#file.preview;
+        if (this.#file.type === 'mp4') {
+            const video = createNode('video', null, this.#el);
+            const source = createNode('source', null, video);
+            source.src = this.#file.src;
+        } else {
+            this.#img = createNode('img', null, this.#el);
+
+            if (this.#file.preview !== null) {
+                this.#img.src = this.#file.preview;
+            }
+
+            this.#img.loading = 'lazy';
         }
-
-        this.#img.loading = 'lazy';
     }
 
     #bind() {
@@ -97,29 +104,39 @@ class FilePreview {
     #fileItem = null;
     #file = null;
     #el = null;
-    #img = null;
 
     constructor(fileItem) {
         this.#fileItem = fileItem;
         this.#file = fileItem.getFile();
 
         this.#make();
-        this.#bind();
     }
 
     #make() {
         this.#el = createNode('div', 'files__item--preview', this.#fileItem.getElement());
-        this.#img = createNode('img', null, this.#el);
-        this.#img.src = this.#file.src;
+
+        if (this.#file.type === 'mp4') {
+            const video = createNode('video', null, this.#el);
+            const source = createNode('source', null, video);
+            source.src = this.#file.src;
+            video.autoplay = true;
+            video.loop = true;
+
+            video.onloadeddata = () => {
+                this.#onImageLoad(video.videoWidth, video.videoHeight)
+            };
+
+        } else {
+            const img = createNode('img', null, this.#el);
+            img.src = this.#file.src;
+
+            img.onload = () => {
+                this.#onImageLoad(img.naturalWidth, img.naturalHeight);
+            };
+        }
     }
 
-    #bind() {
-        this.#img.onload = this.#onImageLoad.bind(this);
-    }
-
-    #onImageLoad() {
-        const nw = this.#img.naturalWidth;
-        const nh = this.#img.naturalHeight;
+    #onImageLoad(nw, nh) {
         const scale = 1.5;
 
         setTimeout(() => {
@@ -218,6 +235,9 @@ class FilesController {
     }
 
     openDetail(id) {
+        if (this.#pointer.getFile().type === 'mp4') {
+            this.#pointer.clearPreview();
+        }
         window.api.send('openDetail', id);
     }
 
