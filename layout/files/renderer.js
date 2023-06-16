@@ -35,17 +35,14 @@ class FileItem {
     }
 
     #bind() {
-        this.#el.addEventListener("click", this.#onClick.bind(this));
-        this.#el.addEventListener("dblclick", this.#onDbClick.bind(this));
+        this.#el.addEventListener("click", this.#onClick.bind(this))
     }
 
-    #onDbClick(e) {
-        e.preventDefault();
-        this.#controller.onItemDbClick(this.#file.id);
-    }
-
-    #onClick() {
-        this.#controller.onItemClick(this.#file.id);
+    #onClick(e) {
+		if (e.detail === 1)
+            this.#controller.onItemClick(this.#file.id);
+		else
+			this.#controller.onItemDbClick(this.#file.id);
     }
 
     showPreview() {
