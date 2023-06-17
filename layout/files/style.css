@@ -161,7 +161,7 @@ html {
     left: 0;
     width: 100%;
     height: 100px;
-    background: rgb(163 163 163);
+    background: #759aa2;
     border-radius: 8px;
     box-shadow: 0 0 20px 10px #00000085;
     opacity: 0;
@@ -171,4 +171,60 @@ html {
 
 .scrollbar:hover .scrollbar__bar {
     opacity: 1;
+}
+
+.background {
+    z-index: -1000;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background: #2c2c2c;
+    filter: blur(200px);
+    isolation: isolate;
+}
+
+.back__circle {
+    position: absolute;
+    width: 1000px;
+    height: 1000px;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+}
+.back__circle.c1 {
+    background: #345c4b;
+    top: -709px; left: -469px;
+    animation: c1-move 77s ease-in-out infinite
+}
+.back__circle.c2 {
+    background: #34505c;
+    top: 353px; left: 500px;
+    animation: c2-move 90s ease-in-out infinite
+}
+.back__circle.c3 {
+    background: #41345c;
+    top: -700px; left: 800px;
+    animation: c3-move 55s ease-in-out infinite
+}
+
+.background.pause .back__circle {
+    animation-play-state: paused;
+}
+
+@keyframes c1-move {
+    0% { top: -709px; left: -469px; }
+    50% { top: 600px; left: 600px; }
+    100% { top: -709px; left: -469px; }
+}
+@keyframes c2-move {
+    0% { top: 353px; left: 500px; }
+    50% { top: 353px; left: -397px; }
+    100% { top: 353px; left: 500px; }
+}
+
+@keyframes c3-move {
+    0% { top: -700px; left: 800px; }
+    50% { top: 800px; left: 1000px; }
+    100% { top: -700px; left: 800px; }
 }

@@ -296,6 +296,41 @@ window.api.receive('sectionListResult', (sections) => {
 });
 
 
+// background animation
+(function() {
+    let paused = false;
+    let time = Date.now();
+    const back = document.querySelector('.background');
+
+    document.addEventListener('keydown', () => {
+        pauseAnimation();
+    });
+    document.addEventListener('click', () => {
+        pauseAnimation();
+    });
+    document.addEventListener('scroll', () => {
+        pauseAnimation();
+    });
+
+    function pauseAnimation() {
+        if (paused) {
+            time = Date.now();
+            return;
+        }
+        paused = true;
+        back.classList.add('pause');
+    }
+
+    function startAnimation() {
+        if (Date.now() - time > 5000) {
+            paused = false;
+            back.classList.remove('pause');
+        }
+    }
+
+    setInterval(startAnimation, 5000);
+})();
+
 
 
 (function() {

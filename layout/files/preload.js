@@ -20,5 +20,5 @@ contextBridge.exposeInMainWorld('api', {
 })
 
 window.addEventListener('DOMContentLoaded', () => {
-    webFrame.setVisualZoomLevelLimits(1, 4);
+    //webFrame.setVisualZoomLevelLimits(1, 4);
 })
