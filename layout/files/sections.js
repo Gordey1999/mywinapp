@@ -26,8 +26,6 @@ export class SectionList {
 
             el.textContent = this.#cutName(section.name);
             el.dataset.chain = section.chain;
-
-            el.addEventListener('click', this.#onSectionClick.bind(this));
         }
     }
 
@@ -36,12 +34,6 @@ export class SectionList {
             return name.substring(0, 17) + '...';
         }
         return name;
-    }
-
-    #onSectionClick(e) {
-        this.#selectItem(e.target);
-
-        window.keyboardController.pointTo(this, e.target);
     }
 
     #selectItem(item) {
@@ -83,7 +75,7 @@ export class SectionList {
 
 
     onKeyboardEvent(event, i, el) {
-        if (event === 'enter') {
+        if (event === 'enter' || event === 'click') {
             this.#selectItem(el);
         }
     }

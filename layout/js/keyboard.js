@@ -10,6 +10,7 @@ export class KeyboardController {
 
     constructor() {
         document.addEventListener('keydown', this.#onKeyboard.bind(this));
+        document.addEventListener('keyup', this.#onKeyboardUp.bind(this));
     }
 
     #onKeyboard(e) {
@@ -29,12 +30,44 @@ export class KeyboardController {
             this.#move('end');
         } else if (e.code === 'Space' || e.code === 'Enter') {
             this.#trigger('enter');
+        } else if (e.key === 'Shift') {
+            this.#shiftPressed = true;
+        } else if (e.code === 'Control') {
+            this.#controlPressed = true;
         } else {
             triggered = false;
         }
 
         if (triggered) {
             e.preventDefault();
+        }
+    }
+
+    #onKeyboardUp(e) {
+        let triggered = true;
+
+        if (e.key === 'Shift') {
+            this.#shiftPressed = false;
+            this.#trigger('shift');
+        } else if (e.code === 'Control') {
+            this.#controlPressed = false;
+            this.#trigger('control');
+        } else {
+            triggered = false;
+        }
+
+        if (triggered) {
+            e.preventDefault();
+        }
+    }
+
+    #onElementClick(controller, i, e) {
+        if (e.detail === 1) {
+            this.pointTo(controller, i);
+            this.#trigger('click');
+        }
+        else if (e.detail === 2) {
+            this.#trigger('dbClick');
         }
     }
 
@@ -209,6 +242,10 @@ export class KeyboardController {
             this.#blocks[index] = block;
         } else {
             this.#blocks.push(block);
+        }
+
+        for (let i = 0; i < items.length; i++) {
+            items[i].addEventListener('click', this.#onElementClick.bind(this, controller, i));
         }
 
         for (const block of this.#blocks) {

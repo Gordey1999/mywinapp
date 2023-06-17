@@ -19,8 +19,6 @@ class FileItem {
         this.#controller = controller;
         this.#file = file;
         this.#make();
-
-        this.#bind();
     }
 
     #make() {
@@ -39,17 +37,6 @@ class FileItem {
 
             this.#img.loading = 'lazy';
         }
-    }
-
-    #bind() {
-        this.#el.addEventListener("click", this.#onClick.bind(this))
-    }
-
-    #onClick(e) {
-		if (e.detail === 1)
-            this.#controller.onItemClick(this.#file.id);
-		else
-			this.#controller.onItemDbClick(this.#file.id);
     }
 
     showPreview() {
@@ -208,16 +195,12 @@ class FilesController {
         }
     }
 
-    onItemClick(id) {
-        const index = this.getItemIndex(id);
-        window.keyboardController.pointTo(this, index);
-        this.#pointer.togglePreview();
-    }
-    onItemDbClick(id) {
-        this.openDetail(id);
-    }
     onKeyboardEvent(event, i) {
         if (event === 'enter') {
+            this.openDetail(this.#items[i].getFile().id);
+        } else if (event === 'click' || event === 'shift') {
+            this.#pointer.togglePreview();
+        } else if (event === 'dbClick') {
             this.openDetail(this.#items[i].getFile().id);
         }
     }
