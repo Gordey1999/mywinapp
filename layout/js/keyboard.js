@@ -283,7 +283,7 @@ export class KeyboardController {
                 elOrIndex = Array.prototype.indexOf.call(this.#blocks[index].items, elOrIndex) ?? 0;
             }
 
-            if (elOrIndex !== this.#pointer) {
+            if (index !== this.#blockPointer || elOrIndex !== this.#pointer) {
                 this.#setPointer(index, elOrIndex);
                 this.#updateXCourse();
             }
