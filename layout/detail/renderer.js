@@ -2,9 +2,6 @@ import {createNode} from "../js/tools.js";
 
 window.api.receive('detailInitResult', (files, selectedId) => {
 
-    const container = document.querySelector('.container')
-    container.innerHTML = '';
-
     let index = null;
     for (const i in files) {
         if (files[i].id === selectedId)
@@ -12,16 +9,14 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     }
 
     let video = null;
-    const item = document.createElement('div')
-    item.classList.add('item')
+    const item = document.querySelector('.item');
+    const menu = document.querySelector('.menu');
 
-    const img = document.createElement('img')
+    const img = document.createElement('img');
 
     showFile(files[index]);
-    //img.loading = 'lazy';
-    item.append(img);
 
-    container.append(item);
+    item.append(img);
 
     document.addEventListener('keydown', (e) => {
         if (e.code === 'KeyD' || e.code === 'ArrowRight') {
@@ -51,10 +46,12 @@ window.api.receive('detailInitResult', (files, selectedId) => {
             source.src = file.src;
             video.autoplay = true;
             video.loop = true;
-            //video.controls = true;
-            //video.controlsList = 'nofullscreen';
 
             img.style.display = 'none';
+
+            video.onloadeddata = () => {
+                fillMenuData(file.name, video.videoWidth, video.videoHeight);
+            };
         } else {
             if (video !== null) {
                 video.remove();
@@ -62,7 +59,43 @@ window.api.receive('detailInitResult', (files, selectedId) => {
                 video = null;
             }
             img.src = file.src;
+
+            img.onload = () => {
+                fillMenuData(img.naturalWidth, img.naturalHeight);
+            };
         }
     }
+
+    function fillMenuData(width, height) {
+        menu.querySelector('.js-menu-number').textContent = index + ' / ' + files.length;
+        menu.querySelector('.js-menu-name').textContent = files[index].name;
+        menu.querySelector('.js-menu-size').textContent = width + ' x ' + height;
+    }
+
+    menu.querySelector('.js-menu-explorer').addEventListener('click', () => {
+        window.api.send('detailOpenInExplorer', files[index]);
+    });
 })
 window.api.send('detailInit');
+
+
+// hide cursor
+(function() {
+    const container = document.querySelector('.container');
+    let timer = null;
+
+    document.addEventListener('mousemove', () => {
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        } else {
+            container.classList.remove('hideCursor');
+        }
+
+        timer = setTimeout(() => {
+            container.classList.add('hideCursor');
+            timer = null;
+        }, 1000);
+    });
+
+})();

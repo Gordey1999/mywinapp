@@ -4,7 +4,7 @@ const { contextBridge, webFrame, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('api', {
     send: (channel, data) => {
         // whitelist channels
-        let validChannels = ['detailInit', 'closeDetail'];
+        let validChannels = ['detailInit', 'closeDetail', 'detailOpenInExplorer'];
         if (validChannels.includes(channel)) {
             ipcRenderer.send(channel, data);
         }

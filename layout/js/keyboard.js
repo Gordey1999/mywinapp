@@ -11,6 +11,7 @@ export class KeyboardController {
     constructor() {
         document.addEventListener('keydown', this.#onKeyboard.bind(this));
         document.addEventListener('keyup', this.#onKeyboardUp.bind(this));
+        document.addEventListener('mousemove', this.#showCursor.bind(this));
     }
 
     #onKeyboard(e) {
@@ -78,6 +79,8 @@ export class KeyboardController {
     }
 
     #move(key) {
+        this.#hideCursor();
+
         if (this.#blockPointer === null) {
             if (this.#blocks.length === 0) {
                 return;
@@ -200,8 +203,11 @@ export class KeyboardController {
     #setPointer(bp, p) {
         if (this.#blockPointer !== null && this.#pointer !== null) {
             this.#blocks[this.#blockPointer].items[this.#pointer].classList.remove('pointer');
-            if (bp !== this.#blockPointer)
+            if (bp !== this.#blockPointer) {
+                this.#shiftPressed = false;
+                this.#controlPressed = false;
                 this.#blocks[this.#blockPointer].controller.onSetPointer(null, null);
+            }
         }
         this.#blockPointer = bp;
         this.#pointer = p;
@@ -229,6 +235,13 @@ export class KeyboardController {
             }
         }
         return null;
+    }
+
+    #hideCursor() {
+        document.body.classList.add('hide-cursor');
+    }
+    #showCursor() {
+        document.body.classList.remove('hide-cursor');
     }
 
     addBlock(controller, items) {

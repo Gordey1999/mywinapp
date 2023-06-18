@@ -314,6 +314,16 @@ window.api.receive('sectionListResult', (sections) => {
     setInterval(startAnimation, 5000);
 })();
 
+(function() {
+    document.addEventListener('keydown', function (e) {
+        if (e.code === 'Digit1') {
+            document.body.classList.remove('border-rounded');
+        } else if (e.code === 'Digit2') {
+            document.body.classList.add('border-rounded');
+        }
+    })
+})();
+
 
 
 (function() {
