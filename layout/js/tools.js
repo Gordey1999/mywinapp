@@ -101,11 +101,12 @@ class Scrollbar {
 
         const options = this.#moveOptions;
         const my = e.clientY;
-        if (my > options.max || my < options.min) {
-            return;
-        }
 
-        const pos = (my - options.min) / (options.max - options.min);
+
+        let pos = (my - options.min) / (options.max - options.min);
+        if (my < options.min) pos = 0;
+        else if (my > options.max) pos = 1;
+
         const viewportHeight = window.innerHeight;
         const docHeight = document.documentElement.scrollHeight;
         const maxScroll = docHeight - viewportHeight;
