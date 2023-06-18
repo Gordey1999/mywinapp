@@ -32,9 +32,9 @@ export class KeyboardController {
         } else if (e.code === 'Space' || e.code === 'Enter') {
             this.#trigger('enter');
         } else if (e.key === 'Shift') {
-            this.#shiftPressed = true;
+            //this.#shiftPressed = true;
         } else if (e.code === 'Control') {
-            this.#controlPressed = true;
+            //this.#controlPressed = true;
         } else {
             triggered = false;
         }
@@ -48,10 +48,10 @@ export class KeyboardController {
         let triggered = true;
 
         if (e.key === 'Shift') {
-            this.#shiftPressed = false;
+            //this.#shiftPressed = false;
             this.#trigger('shift');
         } else if (e.code === 'Control') {
-            this.#controlPressed = false;
+            //this.#controlPressed = false;
             this.#trigger('control');
         } else {
             triggered = false;
@@ -204,8 +204,8 @@ export class KeyboardController {
         if (this.#blockPointer !== null && this.#pointer !== null) {
             this.#blocks[this.#blockPointer].items[this.#pointer].classList.remove('pointer');
             if (bp !== this.#blockPointer) {
-                this.#shiftPressed = false;
-                this.#controlPressed = false;
+	            //this.#shiftPressed = false;
+	            //this.#controlPressed = false;
                 this.#blocks[this.#blockPointer].controller.onSetPointer(null, null);
             }
         }

@@ -1,3 +1,7 @@
+html {
+	user-select: none;
+}
+
 body {
     width: 100%;
     background: black;

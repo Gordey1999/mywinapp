@@ -106,6 +106,7 @@ class FilePreview {
             video.src = this.#file.src;
             video.autoplay = true;
             video.loop = true;
+			video.muted = true;
 
             video.onloadeddata = () => {
                 this.#onImageLoad(video.videoWidth, video.videoHeight)
