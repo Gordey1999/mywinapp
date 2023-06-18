@@ -39,6 +39,9 @@ export function getAbsPosition(el) {
     };
 }
 
+
+
+
 export function createScrollbar(el) {
     new Scrollbar(el);
 }
@@ -49,6 +52,9 @@ class Scrollbar {
     #line = null;
     #bar = null;
     #timer = null;
+
+    #moveBar = false;
+    #moveOptions = null;
 
     constructor(el) {
         this.#container = el;
@@ -70,9 +76,47 @@ class Scrollbar {
         } else {
             this.#container.addEventListener('scroll', this.#onScroll.bind(this));
         }
+
+        this.#el.addEventListener('mouseover', this.#onScroll.bind(this));
+        this.#bar.addEventListener('mousedown', this.#onMouseDown.bind(this));
+        document.addEventListener('mousemove', this.#onMouseMove.bind(this));
+        document.addEventListener('mouseup', this.#onMouseUp.bind(this));
     }
 
-    #onScroll(e) {
+    #onMouseDown(e) {
+        this.#moveBar = true;
+
+        const my = e.clientY;
+        const lineHeight = this.#line.offsetHeight;
+        const barHeight = this.#bar.offsetHeight;
+        const barOffset = this.#bar.offsetTop;
+
+        this.#moveOptions = {
+            min: my - barOffset,
+            max: my + (lineHeight - barOffset - barHeight),
+        }
+    }
+    #onMouseMove(e) {
+        if (!this.#moveBar) return;
+
+        const options = this.#moveOptions;
+        const my = e.clientY;
+        if (my > options.max || my < options.min) {
+            return;
+        }
+
+        const pos = (my - options.min) / (options.max - options.min);
+        const viewportHeight = window.innerHeight;
+        const docHeight = document.documentElement.scrollHeight;
+        const maxScroll = docHeight - viewportHeight;
+
+        window.scrollTo(0, pos * maxScroll);
+    }
+    #onMouseUp() {
+        this.#moveBar = false;
+    }
+
+    #onScroll() {
 
         const scroll = document.documentElement.scrollTop;
         const viewportHeight = window.innerHeight; // equals document.documentElement.clientHeight

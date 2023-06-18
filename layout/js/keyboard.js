@@ -95,12 +95,12 @@ export class KeyboardController {
 
         if (key === 'left') {
             if (p === 0) { return; }
-            this.#setPointer(bp, p - 1, true);
+            this.#setPointer(bp, p - 1);
             this.#updateXCourse();
 
         } else if (key === 'right') {
             if (p === max) { return; }
-            this.#setPointer(bp, p + 1, true);
+            this.#setPointer(bp, p + 1);
             this.#updateXCourse();
 
         } else if (key === 'home') {
