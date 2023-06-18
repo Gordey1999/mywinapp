@@ -45,8 +45,10 @@ html ::-webkit-scrollbar {
 .menu-container {
     position: absolute;
     left: 0;
-    top: 0;
     width: 100%;
+}
+.menu-container.top {
+    top: 0;
 }
 
 .menu-container:hover {
@@ -84,4 +86,41 @@ html ::-webkit-scrollbar {
     width: 2px;
     border-radius: var(--border-radius-s);
     margin: 2px 0;
+}
+
+
+
+
+
+.menu-container.bottom {
+    bottom: 0;
+}
+.menu-container.bottom.hidden {
+    display: none;
+}
+.video-controls {
+    width: calc(100% - 20px);
+}
+
+.video-controls .timeline {
+    width: 100%;
+    background: #ffffff1c;
+    height: 4px;
+    align-self: center;
+    position: relative;
+    transition: height 500ms;
+    cursor: pointer;
+}
+
+.video-controls .timeline:hover {
+    height: 10px;
+}
+
+.video-controls .timeline__point {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: white;
 }

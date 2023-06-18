@@ -26,8 +26,7 @@ class FileItem {
 
         if (this.#file.type === 'mp4') {
             const video = createNode('video', null, this.#el);
-            const source = createNode('source', null, video);
-            source.src = this.#file.src;
+            video.src = this.#file.src;
         } else {
             this.#img = createNode('img', null, this.#el);
 
@@ -104,8 +103,7 @@ class FilePreview {
 
         if (this.#file.type === 'mp4') {
             const video = createNode('video', null, this.#el);
-            const source = createNode('source', null, video);
-            source.src = this.#file.src;
+            video.src = this.#file.src;
             video.autoplay = true;
             video.loop = true;
 

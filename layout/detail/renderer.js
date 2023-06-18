@@ -1,5 +1,80 @@
 import {createNode} from "../js/tools.js";
 
+class VideoPlayer {
+    #video = null;
+
+    #controls = {
+        container: document.querySelector('.menu-container.bottom'),
+        time: document.querySelector('.video-controls .time'),
+        duration: document.querySelector('.video-controls .duration'),
+        timeline: document.querySelector('.video-controls .timeline'),
+        point: document.querySelector('.video-controls .timeline__point'),
+    }
+
+
+    #timer = null;
+
+    constructor(video) {
+        this.#video = video;
+        this.#make();
+        this.#bind();
+        this.#showControls();
+    }
+    #make() {
+        this.#controls.duration.textContent = this.#formatTime(this.#video.duration);
+    }
+
+    #bind() {
+        this.#timer = setInterval(this.#updateTime.bind(this), 1000);
+        this.#controls.timeline.addEventListener('click', this.#onTimelineClick.bind(this));
+    }
+    #unbind() {
+        clearInterval(this.#timer);
+    }
+
+    #onTimelineClick(e) {
+        const duration = this.#video.duration;
+        const timelineWidth = this.#controls.timeline.offsetWidth;
+        const x = e.offsetX;
+        this.#video.currentTime = (x / timelineWidth) * duration;
+        this.#updateTime();
+    }
+
+    #updateTime() {
+        const time = Math.floor(this.#video.currentTime);
+        const duration = this.#video.duration;
+        const timelineWidth = this.#controls.timeline.offsetWidth;
+
+        this.#controls.time.textContent = this.#formatTime(time);
+
+        this.#controls.point.style.width = (time / duration) * timelineWidth + 'px';
+    }
+    #formatTime(time) {
+        const seconds = Math.floor(time % 60);
+        const minutes = Math.floor(time / 60 % 3600);
+        const hours = Math.floor(time / 3600);
+
+        let res = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+        if (hours > 0) {
+            res = hours + res;
+        }
+        return res;
+    }
+
+    #showControls() {
+        this.#controls.container.classList.remove('hidden');
+    }
+    #hideControls() {
+        this.#controls.container.classList.add('hidden');
+    }
+
+    destroy() {
+        this.#hideControls();
+        this.#unbind();
+    }
+}
+
+
 window.api.receive('detailInitResult', (files, selectedId) => {
 
     let index = null;
@@ -9,8 +84,9 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     }
 
     let video = null;
+    let player = null;
     const item = document.querySelector('.item');
-    const menu = document.querySelector('.menu');
+    const menu = document.querySelector('.file-info');
 
     const img = document.createElement('img');
 
@@ -37,20 +113,25 @@ window.api.receive('detailInitResult', (files, selectedId) => {
 
 
     function showFile(file) {
+        if (player) {
+            player.destroy();
+            player = null;
+        }
+
         if (file.type === 'mp4') {
             if (video !== null) {
                 video.remove();
             }
             video = createNode('video', null, item);
-            const source = createNode('source', null, video);
-            source.src = file.src;
+            video.src = file.src;
             video.autoplay = true;
             video.loop = true;
 
             img.style.display = 'none';
 
             video.onloadeddata = () => {
-                fillMenuData(file.name, video.videoWidth, video.videoHeight);
+                fillMenuData(video.videoWidth, video.videoHeight);
+                player = new VideoPlayer(video);
             };
         } else {
             if (video !== null) {
@@ -67,12 +148,12 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     }
 
     function fillMenuData(width, height) {
-        menu.querySelector('.js-menu-number').textContent = index + ' / ' + files.length;
-        menu.querySelector('.js-menu-name').textContent = files[index].name;
-        menu.querySelector('.js-menu-size').textContent = width + ' x ' + height;
+        menu.querySelector('.number').textContent = index + ' / ' + files.length;
+        menu.querySelector('.name').textContent = files[index].name;
+        menu.querySelector('.size').textContent = width + ' x ' + height;
     }
 
-    menu.querySelector('.js-menu-explorer').addEventListener('click', () => {
+    menu.querySelector('.explorer').addEventListener('click', () => {
         window.api.send('detailOpenInExplorer', files[index]);
     });
 })
