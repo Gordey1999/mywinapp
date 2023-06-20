@@ -8,6 +8,11 @@ export class KeyboardController {
     #blockPointer = null;
     #xCourse = 0;
 
+	#pressed = {
+		shift: false,
+		control: false,
+	};
+
     constructor() {
         document.addEventListener('keydown', this.#onKeyboard.bind(this));
         document.addEventListener('keyup', this.#onKeyboardUp.bind(this));
@@ -16,6 +21,9 @@ export class KeyboardController {
 
     #onKeyboard(e) {
         let triggered = true;
+
+		this.#pressed.shift = e.shiftKey;
+		this.#pressed.control = e.ctrlKey;
 
         if (e.code === 'KeyD' || e.code === 'ArrowRight') {
             this.#move('right');
@@ -32,9 +40,9 @@ export class KeyboardController {
         } else if (e.code === 'Space' || e.code === 'Enter') {
             this.#trigger('enter');
         } else if (e.key === 'Shift') {
-            //this.#shiftPressed = true;
+	        this.#trigger('shift');
         } else if (e.code === 'Control') {
-            //this.#controlPressed = true;
+	        this.#trigger('control');
         } else {
             triggered = false;
         }
@@ -48,11 +56,9 @@ export class KeyboardController {
         let triggered = true;
 
         if (e.key === 'Shift') {
-            //this.#shiftPressed = false;
-            this.#trigger('shift');
-        } else if (e.code === 'Control') {
-            //this.#controlPressed = false;
-            this.#trigger('control');
+            this.#trigger('shiftUp');
+        } else if (e.key === 'Control') {
+            this.#trigger('controlUp');
         } else {
             triggered = false;
         }
@@ -204,9 +210,7 @@ export class KeyboardController {
         if (this.#blockPointer !== null && this.#pointer !== null) {
             this.#blocks[this.#blockPointer].items[this.#pointer].classList.remove('pointer');
             if (bp !== this.#blockPointer) {
-	            //this.#shiftPressed = false;
-	            //this.#controlPressed = false;
-                this.#blocks[this.#blockPointer].controller.onSetPointer(null, null);
+                this.#blocks[this.#blockPointer].controller.onSetPointer(null, null, this.#pressed);
             }
         }
         this.#blockPointer = bp;
@@ -214,7 +218,7 @@ export class KeyboardController {
 
         this.#blocks[bp].items[p].classList.add('pointer');
         scrollToElement(this.#blocks[bp].items[p], 150);
-        this.#blocks[bp].controller.onSetPointer(p, this.#getPointedElement());
+        this.#blocks[bp].controller.onSetPointer(p, this.#getPointedElement(), this.#pressed);
     }
     #updateXCourse() {
         this.#xCourse = getAbsPosition(this.#getPointedElement()).left;

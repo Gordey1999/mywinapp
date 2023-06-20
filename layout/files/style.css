@@ -37,6 +37,21 @@ body.border-rounded {
     /*opacity: 0.6;*/
     /*background: black;*/
 }
+.files-container.selectMode .files__item {
+	background: white;
+}
+.files-container.selectMode .files__item img {
+	opacity: 0.5
+}
+.files-container.selectMode .files__item video {
+	opacity: 0.5
+}
+.files-container.selectMode .files__item.selected img {
+	opacity: 1;
+}
+.files-container.selectMode .files__item.selected video {
+	opacity: 1;
+}
 .files__item.pointer {
     border: 2px solid #ffffff;
     border-radius: var(--border-radius-m);

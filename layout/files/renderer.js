@@ -15,6 +15,8 @@ class FileItem {
     #preview = null;
     #timer = null;
 
+	#selected = false;
+
     constructor(controller, file) {
         this.#controller = controller;
         this.#file = file;
@@ -66,6 +68,24 @@ class FileItem {
     togglePreview() {
         this.#preview ? this.clearPreview() : this.showPreview();
     }
+
+	setSelected(b) {
+		if (this.#selected === b) { return; }
+
+		this.#selected = b;
+
+		if (b) {
+			this.#el.classList.add('selected');
+		} else {
+			this.#el.classList.remove('selected');
+		}
+	}
+	toggleSelected() {
+		this.setSelected(!this.#selected);
+	}
+	getSelected() {
+		return this.#selected;
+	}
 
     getXIndex() {
         return this.#controller.getItemIndex(this.#file.id) % itemsInRow;
@@ -164,7 +184,13 @@ class FilesController {
     #el = null;
     #items = null;
     #filesPos = null;
-    #pointer = null;
+	#pointerItem = null;
+
+	#selectMode = false;
+	#selectOptions = {
+		start: null,
+		startToggled: false,
+	};
 
     constructor(container) {
         this.#el = container;
@@ -174,6 +200,7 @@ class FilesController {
 
     setFiles(files) {
         this.#el.innerHTML = '';
+		this.#selectMode = false;
 
         this.#items = [];
 
@@ -198,9 +225,13 @@ class FilesController {
         if (event === 'enter') {
             this.openDetail(this.#items[i].getFile().id);
         } else if (event === 'click' || event === 'shift') {
-            this.#pointer.togglePreview();
+	        if (!this.#selectMode)
+				this.#pointerItem.togglePreview();
         } else if (event === 'dbClick') {
             this.openDetail(this.#items[i].getFile().id);
+        } else if (event === 'controlUp') {
+			console.log('control!');
+			this.#select(i, false, true);
         }
     }
 
@@ -217,22 +248,56 @@ class FilesController {
     }
 
     openDetail(id) {
-        if (this.#pointer.getFile().type === 'mp4') {
-            this.#pointer.clearPreview();
+        if (this.#pointerItem.getFile().type === 'mp4') {
+            this.#pointerItem.clearPreview();
         }
         window.api.send('openDetail', id);
     }
 
-    onSetPointer(i) {
-        if (this.#pointer) {
-            this.#pointer.clearPreview();
+    onSetPointer(i, el, pressed) {
+		this.#select(i, pressed.shift, pressed.control);
+
+        if (this.#pointerItem) {
+            this.#pointerItem.clearPreview();
         }
-        if (i === null) { return; }
-        this.#pointer = this.#items[i];
-        this.#pointer.startPreview();
+
+	    if (i === null) {
+			this.#pointerItem = null;
+			return;
+		}
+        this.#pointerItem = this.#items[i];
+        if (!this.#selectMode)
+			this.#pointerItem.startPreview();
     }
 
-    selectId(id) {
+	#select(i, shift, control) {
+		if (i === null || (!shift && !control)) {
+			this.#selectOptions.start = i;
+			this.#selectOptions.startToggled = false;
+			return;
+		}
+
+		if (!this.#selectMode) {
+			this.#selectMode = true;
+			this.#el.classList.add('selectMode');
+		}
+
+		if (shift) {
+
+		} else if (control) {
+			// if (this.#selectOptions.start === i) {
+			// 	this.#items[i].toggleSelected();
+			// 	return;
+			// }
+			// if (!this.#selectOptions.startToggled) {
+			// 	this.#items[this.#selectOptions.start].toggleSelected();
+			// 	this.#selectOptions.startToggled = true;
+			// }
+			this.#items[i].toggleSelected();
+		}
+	}
+
+    setPointer(id) {
         const index = this.getItemIndex(id);
         window.keyboardController.pointTo(this, index);
     }
@@ -269,7 +334,7 @@ window.api.receive('sectionListResult', (sections) => {
     });
 
     window.api.receive('setSelected', (selectedId) => {
-        controller.selectId(selectedId);
+        controller.setPointer(selectedId);
     });
 
     window.selectSection = (section) => {
