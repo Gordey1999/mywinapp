@@ -220,12 +220,12 @@ html {
 .back__circle.c1 {
     background: #345c4b;
     top: -709px; left: -469px;
-    animation: c1-move 77s ease-in-out infinite
+    animation: c1-move 85s ease-in-out infinite
 }
 .back__circle.c2 {
     background: #34505c;
     top: 353px; left: 500px;
-    animation: c2-move 90s ease-in-out infinite
+    animation: c2-move 66s ease-in-out infinite
 }
 .back__circle.c3 {
     background: #41345c;
@@ -250,6 +250,6 @@ html {
 
 @keyframes c3-move {
     0% { top: -700px; left: 800px; }
-    50% { top: 800px; left: 1000px; }
+    50% { top: 500px; left: 1000px; }
     100% { top: -700px; left: 800px; }
 }

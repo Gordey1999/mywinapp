@@ -148,7 +148,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     }
 
     function fillMenuData(width, height) {
-        menu.querySelector('.number').textContent = index + ' / ' + files.length;
+        menu.querySelector('.number').textContent = (index + 1) + ' / ' + files.length;
         menu.querySelector('.name').textContent = files[index].name;
         menu.querySelector('.size').textContent = width + ' x ' + height;
     }
