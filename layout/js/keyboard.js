@@ -41,7 +41,7 @@ export class KeyboardController {
             this.#trigger('enter');
         } else if (e.key === 'Shift') {
 	        this.#trigger('shift');
-        } else if (e.code === 'Control') {
+        } else if (e.key === 'Control') {
 	        this.#trigger('control');
         } else {
             triggered = false;

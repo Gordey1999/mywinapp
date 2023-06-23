@@ -4,6 +4,15 @@ import { KeyboardController } from "../js/keyboard.js";
 import { createScrollbar, createNode, scrollToElement } from "../js/tools.js";
 import { SectionList } from "./sections.js";
 
+/*
+cntrl + x - для перетаскивания? cntrl уже занять
+Можно заменить на m или x.
+Лучше просто m, чтобы передвинуть все выбранные элементы в место после указателя
+Имитировать contr press and shift press, чтобы не мучиться
+
+
+ */
+
 const itemsInRow = 10;
 
 class FileItem {
@@ -25,12 +34,14 @@ class FileItem {
 
     #make() {
         this.#el = createNode('div', 'files__item', this.#controller.getContainer());
+    }
 
+    createImage() {
         if (this.#file.type === 'mp4') {
-            const video = createNode('video', null, this.#el);
-            video.src = this.#file.src;
+            this.#img = createNode('video', 'files__item-img', this.#el);
+            this.#img.src = this.#file.src;
         } else {
-            this.#img = createNode('img', null, this.#el);
+            this.#img = createNode('img', 'files__item-img', this.#el);
 
             if (this.#file.preview !== null) {
                 this.#img.src = this.#file.preview;
@@ -39,6 +50,14 @@ class FileItem {
             this.#img.loading = 'lazy';
         }
     }
+    removeImage() {
+        this.#img.remove();
+        this.#img = null;
+    }
+    imageCreated() {
+        return this.#img !== null;
+    }
+
 
     showPreview() {
         if (this.#preview) { return; }
@@ -122,7 +141,7 @@ class FilePreview {
         this.#el = createNode('div', 'files__item--preview', this.#fileItem.getElement());
 
         if (this.#file.type === 'mp4') {
-            const video = createNode('video', null, this.#el);
+            const video = createNode('video', 'files__item--preview-img', this.#el);
             video.src = this.#file.src;
             video.autoplay = true;
             video.loop = true;
@@ -133,7 +152,7 @@ class FilePreview {
             };
 
         } else {
-            const img = createNode('img', null, this.#el);
+            const img = createNode('img', 'files__item--preview-img', this.#el);
             img.src = this.#file.src;
 
             img.onload = () => {
@@ -190,12 +209,18 @@ class FilesController {
 	#selectOptions = {
 		start: null,
 		startToggled: false,
+        controlDownI: null,
+        controlUpI: null,
 	};
+
+    //#lastScroll = 0;
 
     constructor(container) {
         this.#el = container;
 
         this.#items = [];
+
+        document.addEventListener('scroll', this.optimizeItemsRender.bind(this));
     }
 
     setFiles(files) {
@@ -227,11 +252,15 @@ class FilesController {
         } else if (event === 'click' || event === 'shift') {
 	        if (!this.#selectMode)
 				this.#pointerItem.togglePreview();
+            //if (this.#selectOptions.controlDownI)
         } else if (event === 'dbClick') {
             this.openDetail(this.#items[i].getFile().id);
+        } else if (event === 'control') {
+			this.#selectOptions.controlDownI = i;
+            this.#selectOptions.controlUpI = null;
         } else if (event === 'controlUp') {
-			console.log('control!');
-			this.#select(i, false, true);
+            this.#selectOptions.controlUpI = i;
+            this.#select(i, false, true);
         }
     }
 
@@ -271,9 +300,11 @@ class FilesController {
     }
 
 	#select(i, shift, control) {
+        const options = this.#selectOptions;
+
 		if (i === null || (!shift && !control)) {
-			this.#selectOptions.start = i;
-			this.#selectOptions.startToggled = false;
+            options.start = i;
+            options.startToggled = false;
 			return;
 		}
 
@@ -285,15 +316,13 @@ class FilesController {
 		if (shift) {
 
 		} else if (control) {
-			// if (this.#selectOptions.start === i) {
-			// 	this.#items[i].toggleSelected();
-			// 	return;
-			// }
-			// if (!this.#selectOptions.startToggled) {
-			// 	this.#items[this.#selectOptions.start].toggleSelected();
-			// 	this.#selectOptions.startToggled = true;
-			// }
-			this.#items[i].toggleSelected();
+            if (options.controlUpI !== null) {
+                if (options.controlDownI === options.controlUpI)
+                    this.#items[i].toggleSelected();
+                options.controlUpI = null;
+            } else {
+                this.#items[i].toggleSelected();
+            }
 		}
 	}
 
@@ -304,6 +333,42 @@ class FilesController {
 
     getContainer() {
         return this.#el;
+    }
+
+    optimizeItemsRender() {
+        if (!this.#items.length) return;
+
+        const viewportHeight = window.innerHeight;
+
+        const chunkSize = 300;
+
+        // todo вычислять distToNext и скролл первого элемента один раз.
+        //  Тогда можно будет получать getBoundingClientRect только при инициализации метода
+
+        let view = this.#items[0].getElement().getBoundingClientRect();
+
+        for (let i = 0; i < this.#items.length; i += chunkSize) {
+
+            const nextChunkI = Math.min(this.#items.length - 1, i + chunkSize);
+            const viewNext = this.#items[nextChunkI].getElement().getBoundingClientRect();
+            const distToNext = viewNext.top - view.top;
+
+            const maxJ = Math.min(this.#items.length, i + chunkSize);
+            if (view.top > -distToNext && view.bottom < viewportHeight + distToNext) {
+                if (!this.#items[i].imageCreated()) {
+                    console.log('create ' + i);
+                    for (let j = i; j < maxJ; j++)
+                        this.#items[j].createImage();
+                }
+            } else {
+                if (this.#items[i].imageCreated()) {
+                    console.log('destroy ' + i);
+                    for (let j = i; j < maxJ; j++)
+                        this.#items[j].removeImage();
+                }
+            }
+            view = viewNext;
+        }
     }
 }
 
