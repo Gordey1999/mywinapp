@@ -244,6 +244,8 @@ class FilesController {
         } else {
             window.keyboardController.removeBlock(this);
         }
+
+        this.optimizeItemsRender();
     }
 
     onKeyboardEvent(event, i) {
