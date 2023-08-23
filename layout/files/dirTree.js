@@ -1,16 +1,14 @@
 import {createNode, scrollToElement} from "../js/tools.js";
 
-export class SectionList {
+export class DirTree {
     #container = null;
-    #sections = null;
-    #child = null
+    #dirList = null;
+    #child = null;
     #el = null;
 
-    #selected = null;
-
-    constructor(container, sections) {
+    constructor(container, dirList) {
         this.#container = container;
-        this.#sections = sections;
+        this.#dirList = dirList;
         this.#child = null;
 
         this.#make();
@@ -20,12 +18,12 @@ export class SectionList {
     #make() {
         this.#el = createNode('div', 'section', this.#container);
 
-        for (const section of this.#sections) {
+        for (const dir of this.#dirList) {
             const block = createNode('div', 'section__item', this.#el);
             const el = createNode('div', 'section__item-inner', block);
 
-            el.textContent = this.#cutName(section.name);
-            el.dataset.chain = section.chain;
+            el.textContent = this.#cutName(dir.name);
+            el.dataset.src = dir.src;
         }
     }
 
@@ -40,20 +38,18 @@ export class SectionList {
         this.#el.querySelectorAll('.section__item-inner').forEach((el) => {
             el.classList.remove('active');
         })
+        debugger;
 
         this.destroyChild();
 
         item.classList.add('active');
 
-        const chain = item.dataset.chain;
+        window.selectSection(this, item.dataset.src);
 
-        window.selectSection(chain);
-
-        for (const section of this.#sections) {
-            if (section.chain === chain && section.children.length) {
-                this.#child = new SectionList(this.#container, section.children);
-            }
-        }
+    }
+    setChildDirs(dirs) {
+        if (dirs.length)
+            this.#child = new DirTree(this.#container, dirs);
     }
 
     onSetPointer() {

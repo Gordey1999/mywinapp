@@ -2,7 +2,8 @@
 
 import { KeyboardController } from "../js/keyboard.js";
 import { createScrollbar, createNode, scrollToElement } from "../js/tools.js";
-import { SectionList } from "./sections.js";
+import { DirTree } from "./dirTree.js";
+import { FilesIndexer } from "./indexing.js";
 
 /*
 cntrl + x - для перетаскивания? cntrl уже занять
@@ -114,7 +115,9 @@ class FileItem {
     }
 
     setPreview(path) {
-        this.#img.src = path;
+        this.#file.preview = path;
+        if (this.#img)
+            this.#img.src = path;
     }
     getElement() {
         return this.#el;
@@ -213,12 +216,15 @@ class FilesController {
         controlUpI: null,
 	};
 
+    #indexer = null;
+
     //#lastScroll = 0;
 
     constructor(container) {
         this.#el = container;
 
         this.#items = [];
+        this.#indexer = new FilesIndexer();
 
         document.addEventListener('scroll', this.optimizeItemsRender.bind(this));
     }
@@ -246,6 +252,8 @@ class FilesController {
         }
 
         this.optimizeItemsRender();
+
+        this.#indexer.setFiles(this.#items);
     }
 
     onKeyboardEvent(event, i) {
@@ -377,73 +385,70 @@ class FilesController {
 createScrollbar(document.body);
 
 
-window.api.send('sectionList');
-
 const container = document.querySelector('.files-container');
 const sectionsContainer = document.querySelector('.sections');
 
-window.api.receive('sectionListResult', (sections) => {
-    sectionsContainer.innerHTML = '';
+window.keyboardController = new KeyboardController();
 
-    window.keyboardController = new KeyboardController();
+let dirTree = new DirTree(sectionsContainer, [{ name: 'root', src: '' }]);
 
-    const sectionList = new SectionList(sectionsContainer, [{ name: 'root', chain: '', children: sections}]);
-
-    const controller = new FilesController(container);
+const controller = new FilesController(container);
 
 
-    window.api.receive('itemListResult', (files) => {
-        controller.setFiles(files);
-    });
+// setTimeout(function() {
+    window.api.send('filesItemList')
+// }, 2000);
 
-    window.api.receive('previewResult', (res) => {
-        controller.setItemPreview(res.id, res.path);
-    });
 
-    window.api.receive('setSelected', (selectedId) => {
-        controller.setPointer(selectedId);
-    });
-
-    window.selectSection = (section) => {
-        window.api.send('itemList', section);
-    }
+window.api.receive('filesItemListResult', (dirs, files) => {
+    dirTree.setChildDirs(dirs);
+    controller.setFiles(files);
 });
+
+window.api.receive('filesSetSelected', (selectedId) => {
+    controller.setPointer(selectedId);
+});
+
+window.selectSection = (currentTree, dir) => {
+    dirTree = currentTree;
+    window.api.send('filesItemList', dir);
+}
 
 
 // background animation
-(function() {
-    let paused = false;
-    let time = Date.now();
-    const back = document.querySelector('.background');
-
-    document.addEventListener('keydown', () => {
-        pauseAnimation();
-    });
-    document.addEventListener('click', () => {
-        pauseAnimation();
-    });
-    document.addEventListener('scroll', () => {
-        pauseAnimation();
-    });
-
-    function pauseAnimation() {
-        if (paused) {
-            time = Date.now();
-            return;
-        }
-        paused = true;
-        back.classList.add('pause');
-    }
-
-    function startAnimation() {
-        if (Date.now() - time > 5000) {
-            paused = false;
-            back.classList.remove('pause');
-        }
-    }
-
-    setInterval(startAnimation, 5000);
-})();
+// (function() {
+//     let paused = false;
+//     let time = Date.now();
+//     const back = document.querySelector('.background');
+//
+//     document.addEventListener('keydown', () => {
+//         pauseAnimation();
+//     });
+//     document.addEventListener('click', () => {
+//         pauseAnimation();
+//     });
+//     document.addEventListener('scroll', () => {
+//         pauseAnimation();
+//     });
+//
+//     function pauseAnimation() {
+//         if (paused) {
+//             time = Date.now();
+//             return;
+//         }
+//         paused = true;
+//         back.classList.add('pause');
+//     }
+//
+//     function startAnimation() {
+//         if (Date.now() - time > 5000) {
+//             paused = false;
+//             back.classList.remove('pause');
+//         }
+//     }
+//
+//     setInterval(startAnimation, 5000);
+// })();
 
 (function() {
     document.addEventListener('keydown', function (e) {
@@ -461,6 +466,7 @@ window.api.receive('sectionListResult', (sections) => {
     const btnOrganize = document.querySelector('.js-organize-dir');
     const btnIndexFiles = document.querySelector('.js-index-files');
     const btnPuzzle = document.querySelector('.js-puzzle');
+    const btnSearchCopies = document.querySelector('.js-search-copies');
 
     btnOrganize.addEventListener('click', () => {
         if (!confirm('sure?')) return;
@@ -477,5 +483,8 @@ window.api.receive('sectionListResult', (sections) => {
     })
     btnPuzzle.addEventListener('click', () => {
         window.api.send('openPuzzle');
+    })
+    btnSearchCopies.addEventListener('click', () => {
+        window.api.send('openSearchCopies');
     })
 })()

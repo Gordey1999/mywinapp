@@ -87,6 +87,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     let player = null;
     const item = document.querySelector('.item');
     const menu = document.querySelector('.file-info');
+    let currentLoaded = false;
 
     const img = document.createElement('img');
 
@@ -97,12 +98,12 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     document.addEventListener('keydown', (e) => {
         if (e.code === 'KeyD' || e.code === 'ArrowRight') {
             e.preventDefault();
-            if (index < files.length - 1)
+            if (currentLoaded && index < files.length - 1)
                 index++;
             showFile(files[index]);
         } else if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
             e.preventDefault();
-            if (index > 0)
+            if (currentLoaded && index > 0)
                 index--;
             showFile(files[index]);
         } else if (e.code === 'Escape' || e.code === 'Enter') {
@@ -113,6 +114,8 @@ window.api.receive('detailInitResult', (files, selectedId) => {
 
 
     function showFile(file) {
+        currentLoaded = false;
+
         if (player) {
             player.destroy();
             player = null;
@@ -132,6 +135,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
             video.onloadeddata = () => {
                 fillMenuData(video.videoWidth, video.videoHeight);
                 player = new VideoPlayer(video);
+                currentLoaded = true;
             };
         } else {
             if (video !== null) {
@@ -143,6 +147,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
 
             img.onload = () => {
                 fillMenuData(img.naturalWidth, img.naturalHeight);
+                currentLoaded = true;
             };
         }
     }

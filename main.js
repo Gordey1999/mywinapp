@@ -2,98 +2,35 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 //const imageinfo = require('imageinfo')
 
-const { getResized } = require('./lib/resize');
 const db = require('./lib/db');
 const settings = require('./lib/settings');
 
 let win;
 
+const winFiles = require('./lib/window/files');
 app.whenReady().then(() => {
-	win = new BrowserWindow({
-		width: 800,
-		height: 600,
-		autoHideMenuBar: true,
-		// frame: false,
-		webPreferences: {
-			preload: path.join(__dirname, 'layout/files/preload.js')
-		}
-	})
-	win.maximize();
-
-	win.loadFile('layout/files/index.html');
+    win = winFiles();
 })
 
 app.on('window-all-closed', () => {
     db.close();
-    if (process.platform !== 'darwin') app.quit()
-})
-
-
-ipcMain.on('sectionList', (event) => {
-    const rows = db.prepare('SELECT dir, count(dir) AS cnt FROM files WHERE dir != ? GROUP BY dir ORDER BY dir ASC').all('');
-
-    const root = { children: [] };
-    for (const row of rows) {
-        const parts = row.dir.split('\\');
-        let current = root;
-        let chain = '';
-        while (parts.length) {
-            const part = parts.shift();
-            chain = path.join(chain, part);
-            let found = false;
-            for (let i = 0; i < current.children.length; i++) {
-                if (current.children[i].name === part) {
-                    current = current.children[i];
-                    found = true;
-                }
-            }
-            if (!found) {
-                current.children.push({
-                    name: part,
-                    chain: chain,
-                    children: [],
-                })
-                current = current.children.at(-1);
-            }
-        }
-    }
-
-    win.webContents.send('sectionListResult', root.children);
-})
-
-let activeFiles = [];
-
-ipcMain.on('itemList', (event, section) => {
-
-    const rows = db.prepare('SELECT * FROM files WHERE dir = ?').all(section);
-
-    activeFiles = rows.map((item) => {
-        return {
-            id: item.id,
-            name: item.name,
-            type: item.type,
-            src: path.join(settings.index.rootDir, item.dir, item.name),
-            preview: getResized(item, win),
-        }
-    });
-    win.webContents.send('itemListResult', activeFiles);
+    if (process.platform !== 'darwin') app.quit();
 })
 
 
 
 ipcMain.on("openIndexFiles", (event, dirPath) => {
-    const indexFiles = require('./lib/indexFiles');
-    indexFiles(win);
 });
 
 
-ipcMain.on('openDetail', (event, selectedId) => {
-    const detail = require('./lib/detail');
-    detail(win, activeFiles, selectedId);
-})
+
 ipcMain.on('openPuzzle', (event) => {
-    const puzzle = require('./lib/puzzle');
+    const puzzle = require('./lib/window/puzzle');
 	puzzle(win);
+})
+ipcMain.on('openSearchCopies', (event) => {
+    const searchCopies = require('./lib/window/searchCopies');
+    searchCopies(win);
 })
 
 
