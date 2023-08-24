@@ -1,9 +1,9 @@
 "use strict";
 
-import { KeyboardController } from "../js/keyboard.js";
-import { createScrollbar, createNode, scrollToElement } from "../js/tools.js";
-import { DirTree } from "./dirTree.js";
-import { FilesIndexer } from "./indexing.js";
+import {KeyboardController} from "../js/keyboard.js";
+import {createNode, createScrollbar} from "../js/tools.js";
+import {DirTree} from "./dirTree.js";
+import {FilesIndexer} from "./indexing.js";
 
 /*
 cntrl + x - для перетаскивания? cntrl уже занять
@@ -46,6 +46,8 @@ class FileItem {
 
             if (this.#file.preview !== null) {
                 this.#img.src = this.#file.preview;
+            } else {
+                this.#img.src = '../img/image_back.png';
             }
 
             this.#img.loading = 'lazy';
@@ -395,14 +397,10 @@ let dirTree = new DirTree(sectionsContainer, [{ name: 'root', src: '' }]);
 const controller = new FilesController(container);
 
 
-// setTimeout(function() {
-    window.api.send('filesItemList')
-// }, 2000);
-
-
 window.api.receive('filesItemListResult', (dirs, files) => {
     dirTree.setChildDirs(dirs);
     controller.setFiles(files);
+    fillDirInfo({ count: files.length });
 });
 
 window.api.receive('filesSetSelected', (selectedId) => {
@@ -411,7 +409,28 @@ window.api.receive('filesSetSelected', (selectedId) => {
 
 window.selectSection = (currentTree, dir) => {
     dirTree = currentTree;
+    fillDirInfo({ path: dir });
     window.api.send('filesItemList', dir);
+}
+
+//setTimeout(() => {
+    dirTree.initRoot();
+//}, 1000);
+
+
+function fillDirInfo(info) {
+    const container = document.querySelector('.dir-info');
+    if (typeof info.path !== 'undefined') {
+        const parts = ('root' + info.path).split('\\');
+        document.querySelector('.dir-info__name').textContent = parts.pop();
+    }
+    if (typeof info.count !== 'undefined') {
+        const countEl = container.querySelector('.dir-info__count');
+        countEl.textContent = `(${info.count})`;
+    }
+    if (info.size) {
+
+    }
 }
 
 

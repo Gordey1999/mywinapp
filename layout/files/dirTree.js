@@ -38,14 +38,15 @@ export class DirTree {
         this.#el.querySelectorAll('.section__item-inner').forEach((el) => {
             el.classList.remove('active');
         })
-        debugger;
 
         this.destroyChild();
 
         item.classList.add('active');
 
         window.selectSection(this, item.dataset.src);
-
+    }
+    initRoot() {
+        this.#selectItem(document.querySelector('.section__item-inner'));
     }
     setChildDirs(dirs) {
         if (dirs.length)

@@ -15,6 +15,8 @@ body {
     --border-radius-m: 0;
     --border-radius-s: 0;
     --cursor-pointer: pointer;
+    --text-color: #ddd;
+    --text-color-accent: #fff;
 }
 
 .background {
