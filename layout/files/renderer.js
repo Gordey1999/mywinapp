@@ -1,9 +1,10 @@
 "use strict";
 
 import {KeyboardController} from "../js/keyboard.js";
-import {createNode, createScrollbar} from "../js/tools.js";
+import {adaptiveGrid, createNode} from "../js/tools.js";
 import {DirTree} from "./dirTree.js";
 import {FilesIndexer} from "./indexing.js";
+import {addMenuOption} from "../js/window.js";
 
 /*
 cntrl + x - для перетаскивания? cntrl уже занять
@@ -14,7 +15,11 @@ cntrl + x - для перетаскивания? cntrl уже занять
 
  */
 
-const itemsInRow = 10;
+let itemsInRow = 10;
+
+adaptiveGrid($('.files-container'), 140, 2, (count) => {
+    itemsInRow = count;
+});
 
 class FileItem {
     #controller = null;
@@ -228,7 +233,7 @@ class FilesController {
         this.#items = [];
         this.#indexer = new FilesIndexer();
 
-        document.addEventListener('scroll', this.optimizeItemsRender.bind(this));
+        document.querySelector('.content').addEventListener('scroll', this.optimizeItemsRender.bind(this));
     }
 
     setFiles(files) {
@@ -289,9 +294,7 @@ class FilesController {
     }
 
     openDetail(id) {
-        if (this.#pointerItem.getFile().type === 'mp4') {
-            this.#pointerItem.clearPreview();
-        }
+        this.#pointerItem.clearPreview();
         window.api.send('openDetail', id);
     }
 
@@ -343,6 +346,10 @@ class FilesController {
         window.keyboardController.pointTo(this, index);
     }
 
+    getSelected() {
+        return this.#pointerItem;
+    }
+
     getContainer() {
         return this.#el;
     }
@@ -368,13 +375,11 @@ class FilesController {
             const maxJ = Math.min(this.#items.length, i + chunkSize);
             if (view.top > -distToNext && view.bottom < viewportHeight + distToNext) {
                 if (!this.#items[i].imageCreated()) {
-                    console.log('create ' + i);
                     for (let j = i; j < maxJ; j++)
                         this.#items[j].createImage();
                 }
             } else {
                 if (this.#items[i].imageCreated()) {
-                    console.log('destroy ' + i);
                     for (let j = i; j < maxJ; j++)
                         this.#items[j].removeImage();
                 }
@@ -383,8 +388,6 @@ class FilesController {
         }
     }
 }
-
-createScrollbar(document.body);
 
 
 const container = document.querySelector('.files-container');
@@ -407,15 +410,29 @@ window.api.receive('filesSetSelected', (selectedId) => {
     controller.setPointer(selectedId);
 });
 
-window.selectSection = (currentTree, dir) => {
-    dirTree = currentTree;
-    fillDirInfo({ path: dir });
-    window.api.send('filesItemList', dir);
-}
+window.addEventListener('selectSection', (e) => {
+    dirTree = e.detail.dirTree;
+    fillDirInfo({ path: e.detail.src });
+    window.api.send('filesItemList', e.detail.src);
+})
 
-//setTimeout(() => {
-    dirTree.initRoot();
-//}, 1000);
+dirTree.initRoot();
+
+
+$(window).on('keydown', (e) => {
+    if (e.code === 'KeyF') {
+        const selected = controller.getSelected();
+        if (selected === null) { return; }
+
+        window.api.send('openFrameMode', selected.getFile().src);
+    }
+    else if (e.code === 'KeyP') {
+        const selected = controller.getSelected();
+        if (selected === null) { return; }
+
+        window.api.send('openFramePuzzle', selected.getFile().src);
+    }
+});
 
 
 function fillDirInfo(info) {
@@ -434,76 +451,34 @@ function fillDirInfo(info) {
 }
 
 
-// background animation
-// (function() {
-//     let paused = false;
-//     let time = Date.now();
-//     const back = document.querySelector('.background');
-//
-//     document.addEventListener('keydown', () => {
-//         pauseAnimation();
-//     });
-//     document.addEventListener('click', () => {
-//         pauseAnimation();
-//     });
-//     document.addEventListener('scroll', () => {
-//         pauseAnimation();
-//     });
-//
-//     function pauseAnimation() {
-//         if (paused) {
-//             time = Date.now();
-//             return;
-//         }
-//         paused = true;
-//         back.classList.add('pause');
-//     }
-//
-//     function startAnimation() {
-//         if (Date.now() - time > 5000) {
-//             paused = false;
-//             back.classList.remove('pause');
-//         }
-//     }
-//
-//     setInterval(startAnimation, 5000);
-// })();
-
 (function() {
     document.addEventListener('keydown', function (e) {
         if (e.code === 'Digit1') {
-            document.body.classList.remove('border-rounded');
+            document.body.classList.remove('--border-rounded');
         } else if (e.code === 'Digit2') {
-            document.body.classList.add('border-rounded');
+            document.body.classList.add('--border-rounded');
         }
     })
 })();
 
 
+//organizeDir, openIndexFiles, openPuzzle
+
 
 (function() {
-    const btnOrganize = document.querySelector('.js-organize-dir');
-    const btnIndexFiles = document.querySelector('.js-index-files');
-    const btnPuzzle = document.querySelector('.js-puzzle');
-    const btnSearchCopies = document.querySelector('.js-search-copies');
+    let currentDir = null;
 
-    btnOrganize.addEventListener('click', () => {
-        if (!confirm('sure?')) return;
-
-        return;
-        window.api.send('organizeDir', currentDir)
-    })
-    window.api.receive('organizeDirResult', () => {
-        window.api.send("dirList", currentDir);
+    window.addEventListener('selectSection', (e) => {
+        currentDir = e.detail.src;
     })
 
-    btnIndexFiles.addEventListener('click', () => {
-        window.api.send('openIndexFiles');
-    })
-    btnPuzzle.addEventListener('click', () => {
+    addMenuOption('puzzle', () => {
         window.api.send('openPuzzle');
-    })
-    btnSearchCopies.addEventListener('click', () => {
+    });
+    addMenuOption('search copies', () => {
         window.api.send('openSearchCopies');
-    })
-})()
+    });
+    addMenuOption('manga mode', () => {
+        window.api.send('openMangaMode', currentDir);
+    });
+})();

@@ -1,7 +1,5 @@
 import {createScrollbar, createNode, scrollToElement} from "../js/tools.js";
 
-createScrollbar(document.body);
-
 (function() {
     const progressEl = document.querySelector('.progress');
     const progressBarEl = progressEl.querySelector('.bar');

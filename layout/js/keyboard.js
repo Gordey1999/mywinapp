@@ -242,10 +242,10 @@ export class KeyboardController {
     }
 
     #hideCursor() {
-        document.body.classList.add('hide-cursor');
+        document.body.classList.add('--hide-cursor');
     }
     #showCursor() {
-        document.body.classList.remove('hide-cursor');
+        document.body.classList.remove('--hide-cursor');
     }
 
     addBlock(controller, items) {

@@ -5,26 +5,31 @@
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <title>Search Copies</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../css/window.css">
     <link rel="stylesheet" href="../css/tools.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="background red">
-    <div class="back-black"></div>
-</div>
+<div class="header"></div>
 
-<div class="progress blue">
-    <div class="bar">
+<div class="window">
+    <div class="content">
+        <div class="background"></div>
 
+        <div class="progress blue">
+            <div class="bar">
+
+            </div>
+        </div>
+
+        <div class="container">
+        </div>
     </div>
 </div>
 
-
-
-<div class="container">
-</div>
-
+<script src="../js/jquery.js" type="module"></script>
+<script src="../js/window.js" type="module"></script>
 <script src="renderer.js" type="module"></script>
 </body>
 </html>

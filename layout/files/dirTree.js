@@ -43,7 +43,13 @@ export class DirTree {
 
         item.classList.add('active');
 
-        window.selectSection(this, item.dataset.src);
+        const event = new CustomEvent('selectSection', {
+            detail: {
+                dirTree: this,
+                src: item.dataset.src
+            }
+        });
+        window.dispatchEvent(event);
     }
     initRoot() {
         this.#selectItem(document.querySelector('.section__item-inner'));

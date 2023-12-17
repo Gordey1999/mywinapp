@@ -1,22 +1,18 @@
 
 const { contextBridge, webFrame, ipcRenderer } = require('electron')
+const {exposeInMainWorld} = require("../preload");
 
-contextBridge.exposeInMainWorld('api', {
-    send: (channel, data) => {
-        // whitelist channels
-        let validChannels = ['searchCopiesInit', 'searchCopiesStep', 'searchCopiesOpenFile'];
-        if (validChannels.includes(channel)) {
-            ipcRenderer.send(channel, data);
-        }
-    },
-    receive: (channel, func) => {
-        let validChannels = ['searchCopiesInitResult', 'searchCopiesStepResult'];
-        if (validChannels.includes(channel)) {
-            // Deliberately strip event as it includes `sender`
-            ipcRenderer.on(channel, (event, ...args) => func(...args));
-        }
-    }
-})
+exposeInMainWorld(
+    [
+        'searchCopiesInit', 'searchCopiesStep', 'searchCopiesOpenFile'
+    ],
+    [
+
+    ],
+    [
+        'searchCopiesInitResult', 'searchCopiesStepResult'
+    ]
+)
 
 window.addEventListener('DOMContentLoaded', () => {
     webFrame.setVisualZoomLevelLimits(1, 4);

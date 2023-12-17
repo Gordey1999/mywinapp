@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, ipcMain} = require('electron')
 const path = require('path')
 //const imageinfo = require('imageinfo')
 
@@ -31,6 +31,22 @@ ipcMain.on('openPuzzle', (event) => {
 ipcMain.on('openSearchCopies', (event) => {
     const searchCopies = require('./lib/window/searchCopies');
     searchCopies(win);
+})
+
+ipcMain.on('openMangaMode', (event, currentDir) => {
+    const mangaMode = require('./lib/window/mangaMode');
+    mangaMode(win, currentDir);
+})
+
+ipcMain.on('openFrameMode', (event, src) => {
+    const frameMode = require('./lib/window/frameMode');
+    frameMode(src);
+})
+
+ipcMain.on('openFramePuzzle', (event, src) => {
+    const framePuzzle = require('./lib/window/framePuzzle');
+    // noinspection JSIgnoredPromiseFromCall
+    framePuzzle(src);
 })
 
 

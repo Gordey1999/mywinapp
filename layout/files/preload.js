@@ -1,25 +1,18 @@
 
-const { contextBridge, webFrame, ipcRenderer } = require('electron')
-//const fs = require('fs')
+const { contextBridge, webFrame, ipcRenderer } = require('electron');
+const { exposeInMainWorld } = require("../preload");
 
-contextBridge.exposeInMainWorld('api', {
-    send: (channel, data) => {
-        // whitelist channels
-        let validChannels = ['filesItemList', 'filesMakePreview', 'filesIndexStep', 'openDetail', 'organizeDir', 'openIndexFiles', 'openPuzzle', 'openSearchCopies'];
-        if (validChannels.includes(channel)) {
-            ipcRenderer.send(channel, data);
-        }
-    },
-    receive: (channel, func) => {
-        let validChannels = ['filesItemListResult', 'filesMakePreviewResult', 'filesIndexStepResult', 'filesSetSelected', 'organizeDirResult'];
-        if (validChannels.includes(channel)) {
-            // Deliberately strip event as it includes `sender`
-            ipcRenderer.on(channel, (event, ...args) => func(...args));
-        }
-    }
-    // todo send and receive with id?
-})
+exposeInMainWorld(
+    [
+        'filesItemList', 'filesMakePreview', 'filesIndexStep',
+        'openDetail', 'organizeDir', 'openIndexFiles', 'openPuzzle', 'openSearchCopies', 'openMangaMode',
+        'openFrameMode', 'openFramePuzzle'
+    ],
+    [
 
-window.addEventListener('DOMContentLoaded', () => {
-    //webFrame.setVisualZoomLevelLimits(1, 4);
-})
+    ],
+    [
+        'filesItemListResult', 'filesMakePreviewResult', 'filesIndexStepResult', 'filesSetSelected',
+        'organizeDirResult'
+    ]
+)

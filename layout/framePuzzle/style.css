@@ -1,0 +1,17 @@
+.container {
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    -webkit-app-region: drag;
+}
+
+.solved-video {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+}
+
+.container img {
+    position: absolute;
+}

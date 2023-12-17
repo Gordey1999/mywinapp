@@ -4,36 +4,22 @@
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>Explorer</title>
+    <title>Frame Mode</title>
     <link rel="stylesheet" href="../css/window.css">
     <link rel="stylesheet" href="../css/tools.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="header"></div>
+<div class="container">
+</div>
 
-<div class="window">
-    <div class="content">
-        <div class="background"></div>
-
-        <div class="progress">
-            <div class="bar">
-
-            </div>
-        </div>
-
-        <div class="sections">
-        </div>
-        <div class="dir-info">
-            <span class="dir-info__name">Root</span>
-            <span class="dir-info__count">(52)</span>
-            <span class="dir-info__size">12MB</span>
-        </div>
-        <div class="files-container">
-
-        </div>
+<div class="overflow">
+    <div class="head">
+        <div class="head-drag"></div>
+        <div class="head-buttons"></div>
     </div>
+    <div class="body-drag"></div>
 </div>
 
 <script src="../js/jquery.js" type="module"></script>

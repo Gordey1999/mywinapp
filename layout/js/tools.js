@@ -11,10 +11,12 @@ export function createNode(tag, className = null, parent = null) {
     return el;
 }
 
+const contentContainer = document.querySelector('.content');
+
 export function scrollToElement(el, offset = 0) {
     const view = el.getBoundingClientRect();
-    const scroll = document.documentElement.scrollTop;
-    const winHeight = window.innerHeight;
+    const scroll = contentContainer.scrollTop;
+    const winHeight = contentContainer.clientHeight;
 
     if (offset === 0) {
         offset = view.height / 2;
@@ -23,9 +25,9 @@ export function scrollToElement(el, offset = 0) {
     const bottom = winHeight - (view.top + view.height + offset);
 
     if (top < 0) {
-        window.scrollTo(0, scroll + top);
+        contentContainer.scrollTo(0, scroll + top);
     } else if (bottom < 0) {
-        window.scrollTo(0, scroll - bottom);
+        contentContainer.scrollTo(0, scroll - bottom);
     }
 }
 
@@ -40,6 +42,31 @@ export function getAbsPosition(el) {
 }
 
 
+export function adaptiveGrid($container, width, margin, fallback = null) {
+    $(window).on('resize', () => {
+        calculate();
+    });
+
+    $container.addClass('--adaptive-grid');
+
+    function calculate() {
+        const containerWidth = $container.width();
+        const elMinWidth = width + margin * 2;
+
+        let count = Math.floor(containerWidth / elMinWidth);
+
+        if (count < 1) { count = 1; }
+
+        const resultWidth = (containerWidth / count) - (margin * 2);
+
+        $container[0].style.setProperty('--grid-item-width', resultWidth + 'px');
+
+        if (fallback !== null) {
+            fallback(count);
+        }
+    }
+    calculate();
+}
 
 
 export function createScrollbar(el) {
@@ -65,17 +92,13 @@ class Scrollbar {
     }
 
     #make() {
-        this.#el = createNode('div', 'scrollbar', this.#container);
+        this.#el = createNode('div', 'scrollbar', this.#container.parentElement);
         this.#line = createNode('div', 'scrollbar__line', this.#el);
         this.#bar = createNode('div', 'scrollbar__bar', this.#line);
     }
 
     #bind() {
-        if (this.#container === document.body) {
-            document.addEventListener('scroll', this.#onScroll.bind(this));
-        } else {
-            this.#container.addEventListener('scroll', this.#onScroll.bind(this));
-        }
+        this.#container.addEventListener('scroll', this.#onScroll.bind(this));
 
         this.#el.addEventListener('mouseover', this.#onScroll.bind(this));
         this.#bar.addEventListener('mousedown', this.#onMouseDown.bind(this));
@@ -107,11 +130,11 @@ class Scrollbar {
         if (my < options.min) pos = 0;
         else if (my > options.max) pos = 1;
 
-        const viewportHeight = window.innerHeight;
-        const docHeight = document.documentElement.scrollHeight;
+        const viewportHeight = this.#container.clientHeight;
+        const docHeight = this.#container.scrollHeight;
         const maxScroll = docHeight - viewportHeight;
 
-        window.scrollTo(0, pos * maxScroll);
+        this.#container.scrollTo(0, pos * maxScroll);
     }
     #onMouseUp() {
         this.#moveBar = false;
@@ -119,9 +142,9 @@ class Scrollbar {
 
     #onScroll() {
 
-        const scroll = document.documentElement.scrollTop;
-        const viewportHeight = window.innerHeight; // equals document.documentElement.clientHeight
-        const docHeight = document.documentElement.scrollHeight;
+        const scroll = this.#container.scrollTop;
+        const viewportHeight = this.#container.clientHeight; // equals document.documentElement.clientHeight
+        const docHeight = this.#container.scrollHeight;
 
         const elHeight = this.#line.offsetHeight;
         let barHeight = viewportHeight / docHeight * elHeight;
@@ -131,7 +154,8 @@ class Scrollbar {
 
         if (barHeight < minBarHeight) {
             barHeight = minBarHeight;
-            offset = (scroll + viewportHeight / 2) / docHeight * (elHeight - minBarHeight);
+            const scrollMax = docHeight - viewportHeight;
+            offset = (scroll / scrollMax) * (elHeight - minBarHeight);
         }
 
         this.#bar.style.height = barHeight + 'px';

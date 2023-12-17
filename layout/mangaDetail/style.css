@@ -1,0 +1,40 @@
+html {
+	user-select: none;
+}
+
+body {
+    width: 100%;
+    background: black !important;
+    height: 100vh;
+    margin: 0;
+
+    font-family: system-ui;
+}
+
+.container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+}
+
+.container.hideCursor {
+    cursor: none;
+}
+
+.item {
+    width: 100%;
+    margin: 4px;
+    height: 100vh;
+}
+
+.item img, .item video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+html ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
