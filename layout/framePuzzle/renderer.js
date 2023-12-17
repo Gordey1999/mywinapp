@@ -14,16 +14,19 @@ window.api.invoke('framePuzzleInit').then((result) => {
     $container.append($img);
 
     $img.one('load', () => {
-        const imageWidth = $img[0].naturalWidth;
-        const imageHeight = $img[0].naturalHeight;
-        const winWidth = $container.width();
-        const winHeight = $container.height();
+        // const imageWidth = $img[0].naturalWidth;
+        // const imageHeight = $img[0].naturalHeight;
+        // const winWidth = $container.width();
+        // const winHeight = $container.height();
+        //
+        // const w = winWidth * result.size;
+        // const h = winHeight * result.size
 
         $img
-            .css('width', winWidth * result.size)
-            .css('height', winHeight * result.size)
-            .css('left', - result.x * winWidth)
-            .css('top', - result.y * winHeight)
+            .css('width', result.imageWidth)
+            .css('height', result.imageHeight)
+            .css('left', - result.xOffset)
+            .css('top', - result.yOffset)
     })
 });
 
