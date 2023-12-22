@@ -410,6 +410,13 @@ class FilesController {
 			);
 			current = current.children[1];
 		}
+		current.children = [{
+			name: 'well done!',
+			callback: () => {
+				window.api.send('openFrameMode', 'well-done.png');
+			}
+		}];
+
 
         const menu = [
             {

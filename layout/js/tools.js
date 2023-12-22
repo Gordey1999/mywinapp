@@ -291,6 +291,7 @@ class ContextMenuList {
 		this._active.$el?.removeClass('active');
 		$item.addClass('active');
 		this._active.$el = $item;
+		this._active.childList = null;
 
 		if (item?.children) {
 			this._openChildList($item, item);
@@ -302,6 +303,7 @@ class ContextMenuList {
 	_onMouseLeave(e) {
 		if (this._active.$el !== null && this._active.childList === null) {
 			this._active.$el?.removeClass('active');
+			this._active.$el = null;
 		}
 	}
 
