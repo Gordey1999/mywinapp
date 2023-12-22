@@ -129,7 +129,7 @@ body.--border-rounded {
     color: var(--text-color);
 }
 
-.context-menu__item:hover {
+.context-menu__item.active {
     background: #4dff7745;
     color: var(--text-color-accent);
 }
@@ -137,13 +137,13 @@ body.--border-rounded {
 .context-menu__item svg {
     stroke: var(--text-color);
 }
-.context-menu__item:hover svg {
+.context-menu__item.active svg {
     stroke: var(--text-color-accent);
 }
 .context-menu__item svg.svg-fill {
     fill: var(--text-color);
 }
-.context-menu__item:hover svg.svg-fill {
+.context-menu__item.active svg.svg-fill {
     fill: var(--text-color-accent);
 }
 

@@ -185,10 +185,32 @@ export class ContextMenu {
 
     constructor(menu, x, y) {
         this._contextMenuList = new ContextMenuList(menu, this, x, y);
+
+		setTimeout(() => {
+			this._bind('on');
+		}, 10);
     }
+
+	_bind(dir) {
+		const $body = $('body');
+		$body[dir]('keydown', this._onKeyboardEvent);
+		$body[dir]('click', this._onClickEvent);
+		$body[dir]('contextmenu', this._onClickEvent);
+	}
+
+	_onKeyboardEvent = () => {
+		this.destroy();
+	}
+
+	_onClickEvent = (e) =>  {
+		if ($(e.target).closest('.context-menu').length === 0) {
+			this.destroy();
+		}
+	}
 
     destroy() {
         this._contextMenuList.destroy();
+	    this._bind('off');
     }
 }
 
@@ -196,8 +218,16 @@ class ContextMenuList {
     _menu = null;
     _$container = null;
     _controller = null
-    _activeChild = null;
-    _timeout = null;
+	_direction = null;
+
+	_itemMap = [];
+
+	_active = {
+		$el: null,
+		childList: null,
+		mouseX: 0,
+		mouseY: 0,
+	};
 
     constructor(menu, controller, x, y, direction = 'right', parentWidth = 0) {
         this._menu = menu;
@@ -206,6 +236,9 @@ class ContextMenuList {
         this._$container = this._make();
 
         this._calculatePosition(x, y, direction, parentWidth);
+
+		this._$container.on('mousemove', this._onMouseMove.bind(this));
+	    this._$container.on('mouseleave', this._onMouseLeave.bind(this));
     }
 
     _make() {
@@ -231,41 +264,66 @@ class ContextMenuList {
         }
     }
 
-    _onMouseOver($item, item) {
-        if (this._activeChild !== null && $item !== this._activeChild?.$el) {
-            setTimeout(this._closeActiveChild.bind(this, this._activeChild), this._controller.closeTimeout)
-        }
+	_onMouseMove(e) {
+		const $item = $(e.target).closest('.context-menu__item');
+		if (!$item.length) { return; }
 
-        if (item.type === 'row' && item?.children) {
-            if (this._activeChild === null) {
-                this._activeChild = {
-                    $el: new ContextMenuList(item.children),
-                    item: item,
-                }
-            } else {
-                this._activeChild = {
-                    item: item,
-                }
-            }
-        } else {
-            this._activeChild = null;
-        }
-    }
+		if (this._active.$el === $item) { return }
 
-    _closeActiveChild(lastActive) {
-        if (this._activeChild?.$el === lastActive) {
-            return;
-        }
-        lastActive.$el.destroy();
+		const item = this._getItem($item);
 
-        if (this._activeChild !== null && !this._activeChild?.$el) {
-            this._activeChild.$el = new ContextMenuList(this._activeChild.item.children);
-        }
+		if (this._active.childList) {
+			const mx = e.screenX;
+			const my = e.screenY;
+
+			if (
+				this._active.childList._direction === 'right' && mx - this._active.mouseX > 2
+				|| this._active.childList._direction === 'left' && this._active.mouseX - mx > 2
+			) {
+				this._active.mouseX = mx;
+				this._active.mouseY = my;
+				return;
+			}
+
+			this._closeChildList();
+		}
+
+		this._active.$el?.removeClass('active');
+		$item.addClass('active');
+		this._active.$el = $item;
+
+		if (item?.children) {
+			this._openChildList($item, item);
+			this._active.mouseX = e.screenX;
+			this._active.mouseY = e.screenY;
+		}
+	}
+
+	_onMouseLeave(e) {
+		if (this._active.$el !== null && this._active.childList === null) {
+			this._active.$el?.removeClass('active');
+		}
+	}
+
+	_getItem($el) {
+		for (const el of this._itemMap) {
+			if (el.$el.get(0) === $el.get(0)) { return el.item; }
+		}
+	}
+
+	_openChildList($item, item) {
+		const { left, top } = $item.offset();
+		const width = $item.outerWidth();
+
+		this._active.childList = new ContextMenuList(item.children, this._controller, left + width, top, this._direction, width);
+	}
+
+	_closeChildList() {
+		this._active.childList.destroy();
     }
 
     _handle($item, item) {
         $item.click(this._onItemClick.bind(this, item));
-        $item.mouseover(this._onMouseOver.bind(this, $item, item));
     }
 
     _makeContainer() {
@@ -282,6 +340,8 @@ class ContextMenuList {
 
         $row.append($icon, $name, $icon2);
         this._handle($row, item);
+
+		this._itemMap.push({ item: item, $el: $row });
 
         $container.append($row);
     }
@@ -308,6 +368,8 @@ class ContextMenuList {
             }
             this._handle($item, item);
 
+	        this._itemMap.push({ item: item, $el: $item });
+
             $row.append($item);
         }
         $container.append($row);
@@ -331,15 +393,27 @@ class ContextMenuList {
         if (y + height > winHeight) {
             y = winHeight - height - 10;
         }
+
+		if (direction === 'left') {
+			x -= parentWidth + width;
+		}
+
         if (direction === 'right' && x + width > winWidth) {
             x -= width + parentWidth;
+			direction = 'left';
+        } else if (direction === 'left' && x < 0) {
+	        x += width + parentWidth;
+	        direction = 'right';
         }
 
         this._$container.css('left', x + 'px');
         this._$container.css('top', y + 'px');
+		this._direction = direction;
     }
 
     destroy() {
+	    this._active.childList?.destroy();
+	    this._active.childList = null;
         this._$container.remove();
     }
 }

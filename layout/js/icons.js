@@ -5,7 +5,7 @@ const icons = {
     unmaximize: [ 16, '<path d="M 3 13 H 11 V 5 H 3 V 13 M 5 5 V 3 H 13 V 11 H 11" stroke-width="1px" fill="none"/>' ],
     menu: [ 24, '<path d="M 3 6 H 21 M 3 12 H 21 M 3 18 H 21" stroke-width="2px" fill="none"/>' ],
 
-    point: [ 16, '<circle cx="8" cy="8" r="2" stroke-width="1px" stroke="none" />' ],
+    point: [ 16, '<circle cx="8" cy="8" r="2" stroke-width="1px" stroke="none" />', true ],
     arrow: [ 16, '<path d="M 6 3 L 11 8 L 6 13" stroke-width="1px" fill="none"/>' ],
     settings: [ 16, '<circle cx="8" cy="8" r="2" stroke-width="1px" fill="none" /><path d="M 5 3 h 6 L 14 8 L 11 13 h -6 L 2 8 L 5 3 h 1" stroke-width="1px" fill="none" />' ],
     explorer: [ 16, '<path d="M 2 13 h 12 v -9 h -7 l -1 -1 h -4 V 13 h 1 M 2 6 h 12" stroke-width="1px" fill="none" />' ],
@@ -25,14 +25,17 @@ export function loadIcon(name) {
         return null;
     }
 
-    return make(icons[name][1], icons[name][0]);
+    return make(icons[name][1], icons[name][0], icons[name].length === 3);
 }
 
-function make(content, width) {
-    const iconHeader = '<svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 #WIDTH# #WIDTH#" width="#WIDTH#px" height="#WIDTH#px">';
+function make(content, width, fill = false) {
+    const iconHeader = '<svg class="#CLASS#" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 #WIDTH# #WIDTH#" width="#WIDTH#px" height="#WIDTH#px">';
     const iconFooter = '</svg>'
 
-    const icon = iconHeader.replaceAll('#WIDTH#', width) + content + iconFooter;
+	let header = iconHeader.replaceAll('#WIDTH#', width);
+	header = header.replace('#CLASS#', fill ? 'svg-fill' : '');
+
+    const icon = header + content + iconFooter;
 
     return (new DOMParser()).parseFromString(icon, "text/xml").documentElement;
 }

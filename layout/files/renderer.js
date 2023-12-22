@@ -68,6 +68,7 @@ class FileItem {
 
 
     showPreview() {
+		return;
         if (this.#preview) { return; }
         this.#preview = new FilePreview(this);
     }
@@ -392,13 +393,30 @@ class FilesController {
     }
 
     #makeContextMenu(evt) {
-        console.log(evt);
+	    const selected = this.getSelected();
+
+		const innerList = {
+			name: 'Woooow',
+		};
+		let current = innerList;
+
+		for (let i = 1; i < 40; i++) {
+			current.children = [];
+			current.children.push(
+				{ name: 'el ' + i * 100 },
+				{ name: 'elem ' + i * 100 + 1 },
+				{ name: 'eleme ' + i * 100 + 2 },
+				{ name: 'element ' + i * 100 + 3 }
+			);
+			current = current.children[1];
+		}
 
         const menu = [
             {
                 name: 'Open in Explorer',
                 icon: 'explorer',
             },
+	        innerList,
             {
                 name: 'Mark...'
             },
@@ -417,7 +435,10 @@ class FilesController {
             },
             { type: 'separator' },
             {
-                name: 'Frame Mode'
+                name: 'Frame Mode',
+	            callback: () => {
+		            window.api.send('openFrameMode', selected.getFile().src);
+	            }
             },
             {
                 type: 'group',
@@ -427,11 +448,14 @@ class FilesController {
                         icon: 'puzzle',
                         grow: true,
                         callback: () => {
-                            console.log('run!');
+	                        window.api.send('openFramePuzzle', selected.getFile().src);
                         }
                     },
                     {
-                        icon: 'settings'
+                        icon: 'settings',
+	                    callback: () => {
+		                    window.api.send('openFramePuzzleSettings', selected.getFile().src);
+	                    }
                     }
                 ]
             },
@@ -482,28 +506,6 @@ window.addEventListener('selectSection', (e) => {
 })
 
 dirTree.initRoot();
-
-
-$(window).on('keydown', (e) => {
-    if (e.code === 'KeyF') {
-        const selected = controller.getSelected();
-        if (selected === null) { return; }
-
-        window.api.send('openFrameMode', selected.getFile().src);
-    }
-    else if (e.code === 'KeyP') {
-        const selected = controller.getSelected();
-        if (selected === null) { return; }
-
-        window.api.send('openFramePuzzleSettings', selected.getFile().src);
-    }
-    else if (e.code === 'KeyO') {
-	    const selected = controller.getSelected();
-	    if (selected === null) { return; }
-
-	    window.api.send('openFramePuzzle', selected.getFile().src);
-    }
-});
 
 
 function fillDirInfo(info) {
