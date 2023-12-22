@@ -111,7 +111,7 @@ body {
 
 .header__menu-button {
     color: var(--text-color);
-    line-height: 37px;
+    line-height: 40px;
     padding: 0 12px;
     border-radius: var(--border-radius-s);
     cursor: var(--cursor-pointer);

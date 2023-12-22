@@ -1,3 +1,4 @@
+import {loadIcon} from "./icons.js";
 
 export function createNode(tag, className = null, parent = null) {
     const el = document.createElement(tag);
@@ -174,5 +175,171 @@ class Scrollbar {
 
     #onTimer() {
         this.#bar.style.removeProperty('opacity');
+    }
+}
+
+
+export class ContextMenu {
+    _contextMenuList = null;
+    closeTimeout = 200;
+
+    constructor(menu, x, y) {
+        this._contextMenuList = new ContextMenuList(menu, this, x, y);
+    }
+
+    destroy() {
+        this._contextMenuList.destroy();
+    }
+}
+
+class ContextMenuList {
+    _menu = null;
+    _$container = null;
+    _controller = null
+    _activeChild = null;
+    _timeout = null;
+
+    constructor(menu, controller, x, y, direction = 'right', parentWidth = 0) {
+        this._menu = menu;
+        this._controller = controller;
+
+        this._$container = this._make();
+
+        this._calculatePosition(x, y, direction, parentWidth);
+    }
+
+    _make() {
+        const $container = this._makeContainer();
+
+        for (const item of this._menu) {
+            if (item?.type === 'separator') {
+                this._makeSeparator($container);
+            } else if (item?.type === 'group') {
+                this._makeGroup(item, $container);
+            } else {
+                item.type = 'row';
+                this._makeRow(item, $container);
+            }
+        }
+        return $container;
+    }
+
+    _onItemClick(item) {
+        if (item?.callback) {
+            this._controller.destroy();
+            item.callback(item);
+        }
+    }
+
+    _onMouseOver($item, item) {
+        if (this._activeChild !== null && $item !== this._activeChild?.$el) {
+            setTimeout(this._closeActiveChild.bind(this, this._activeChild), this._controller.closeTimeout)
+        }
+
+        if (item.type === 'row' && item?.children) {
+            if (this._activeChild === null) {
+                this._activeChild = {
+                    $el: new ContextMenuList(item.children),
+                    item: item,
+                }
+            } else {
+                this._activeChild = {
+                    item: item,
+                }
+            }
+        } else {
+            this._activeChild = null;
+        }
+    }
+
+    _closeActiveChild(lastActive) {
+        if (this._activeChild?.$el === lastActive) {
+            return;
+        }
+        lastActive.$el.destroy();
+
+        if (this._activeChild !== null && !this._activeChild?.$el) {
+            this._activeChild.$el = new ContextMenuList(this._activeChild.item.children);
+        }
+    }
+
+    _handle($item, item) {
+        $item.click(this._onItemClick.bind(this, item));
+        $item.mouseover(this._onMouseOver.bind(this, $item, item));
+    }
+
+    _makeContainer() {
+        const $container = $('<div>').addClass('context-menu');
+        $('body').append($container);
+        return $container;
+    }
+
+    _makeRow(item, $container) {
+        const $row = $('<div>').addClass('context-menu__item');
+        const $icon = this._makeIcon(item.icon ?? null);
+        const $name = $('<div>').addClass('context-menu__item-name').text(item.name);
+        const $icon2 = this._makeIcon(item?.children ? 'arrow' : null);
+
+        $row.append($icon, $name, $icon2);
+        this._handle($row, item);
+
+        $container.append($row);
+    }
+
+    _makeSeparator($container) {
+        const $separator = $('<div>').addClass('context-menu__separator');
+        $container.append($separator);
+    }
+
+    _makeGroup(group, $container) {
+        const $row = $('<div>').addClass('context-menu__item-group');
+
+        for (const item of group.children) {
+            const $item = $('<div>').addClass('context-menu__item');
+
+            if (item?.icon) {
+                $item.append(this._makeIcon(item.icon))
+            }
+            if (item?.name) {
+                $item.append($('<div>').addClass('context-menu__item-name').text(item.name))
+            }
+            if (item?.grow) {
+                $item.addClass('--grow');
+            }
+            this._handle($item, item);
+
+            $row.append($item);
+        }
+        $container.append($row);
+    }
+
+    _makeIcon(icon = null) {
+        const $icon = $('<div>').addClass('context-menu__item-icon');
+        if (icon !== null) {
+            $icon.html(loadIcon(icon));
+        }
+        return $icon;
+    }
+
+    _calculatePosition(x, y, direction, parentWidth) {
+        const winWidth = $(window).width();
+        const winHeight = $(window).height();
+
+        const width = this._$container.outerWidth();
+        const height = this._$container.outerHeight();
+
+        if (y + height > winHeight) {
+            y = winHeight - height - 10;
+        }
+        if (direction === 'right' && x + width > winWidth) {
+            x -= width + parentWidth;
+        }
+
+        this._$container.css('left', x + 'px');
+        this._$container.css('top', y + 'px');
+    }
+
+    destroy() {
+        this._$container.remove();
     }
 }

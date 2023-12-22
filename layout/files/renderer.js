@@ -1,7 +1,7 @@
 "use strict";
 
 import {KeyboardController} from "../js/keyboard.js";
-import {adaptiveGrid, createNode} from "../js/tools.js";
+import {adaptiveGrid, createNode, ContextMenu} from "../js/tools.js";
 import {DirTree} from "./dirTree.js";
 import {FilesIndexer} from "./indexing.js";
 import {addMenuOption} from "../js/window.js";
@@ -263,7 +263,7 @@ class FilesController {
         this.#indexer.setFiles(this.#items);
     }
 
-    onKeyboardEvent(event, i) {
+    onKeyboardEvent(event, i, el, evt) {
         if (event === 'enter') {
             this.openDetail(this.#items[i].getFile().id);
         } else if (event === 'click' || event === 'shift') {
@@ -278,6 +278,8 @@ class FilesController {
         } else if (event === 'controlUp') {
             this.#selectOptions.controlUpI = i;
             this.#select(i, false, true);
+        } else if (event === 'rightClick') {
+            this.#makeContextMenu(evt);
         }
     }
 
@@ -315,6 +317,7 @@ class FilesController {
     }
 
 	#select(i, shift, control) {
+        return;
         const options = this.#selectOptions;
 
 		if (i === null || (!shift && !control)) {
@@ -386,6 +389,68 @@ class FilesController {
             }
             view = viewNext;
         }
+    }
+
+    #makeContextMenu(evt) {
+        console.log(evt);
+
+        const menu = [
+            {
+                name: 'Open in Explorer',
+                icon: 'explorer',
+            },
+            {
+                name: 'Mark...'
+            },
+            {
+                name: 'Sort...',
+                children: [
+                    { name: 'Name', icon: 'point' },
+                    { name: 'Date Create' },
+                    { name: 'Date Update' },
+                    { name: 'Size' },
+                    { name: 'Type' },
+                    { type: 'separator' },
+                    { name: 'Ascending', icon: 'point' },
+                    { name: 'Descending' },
+                ]
+            },
+            { type: 'separator' },
+            {
+                name: 'Frame Mode'
+            },
+            {
+                type: 'group',
+                children: [
+                    {
+                        name: 'Make Puzzle',
+                        icon: 'puzzle',
+                        grow: true,
+                        callback: () => {
+                            console.log('run!');
+                        }
+                    },
+                    {
+                        icon: 'settings'
+                    }
+                ]
+            },
+            { type: 'separator' },
+            {
+                name: 'Copy',
+                icon: 'copy',
+            },
+            {
+                name: 'Paste',
+                icon: 'paste',
+            },
+            {
+                name: 'Delete',
+                icon: 'delete',
+            }
+        ];
+
+        new ContextMenu(menu, evt.x, evt.y);
     }
 }
 
@@ -472,13 +537,13 @@ function fillDirInfo(info) {
         currentDir = e.detail.src;
     })
 
-    addMenuOption('puzzle', () => {
+    addMenuOption('Puzzle', () => {
         window.api.send('openPuzzle');
     });
-    addMenuOption('search copies', () => {
+    addMenuOption('Search Copies', () => {
         window.api.send('openSearchCopies');
     });
-    addMenuOption('manga mode', () => {
+    addMenuOption('Manga Mode', () => {
         window.api.send('openMangaMode', currentDir);
     });
 })();

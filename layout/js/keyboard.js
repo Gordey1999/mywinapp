@@ -78,9 +78,14 @@ export class KeyboardController {
         }
     }
 
-    #trigger(key) {
+    #onElementRightClick(controller, i, e) {
+        this.pointTo(controller, i);
+        this.#trigger('rightClick', e);
+    }
+
+    #trigger(key, e = null) {
         if (this.#blockPointer !== null) {
-            this.#blocks[this.#blockPointer].controller.onKeyboardEvent(key, this.#pointer, this.#getPointedElement());
+            this.#blocks[this.#blockPointer].controller.onKeyboardEvent(key, this.#pointer, this.#getPointedElement(), e);
         }
     }
 
@@ -263,6 +268,7 @@ export class KeyboardController {
 
         for (let i = 0; i < items.length; i++) {
             items[i].addEventListener('click', this.#onElementClick.bind(this, controller, i));
+            items[i].addEventListener('contextmenu', this.#onElementRightClick.bind(this, controller, i));
         }
 
         for (const block of this.#blocks) {

@@ -3,7 +3,18 @@ const icons = {
     minimize: [ 16, '<path d="M 3 8 H 13" stroke-width="1.5px" fill="none"/>' ],
     maximize: [ 16, '<path d="M 3 3 H 13 V 13 H 3 Z" stroke-width="1.5px" fill="none"/>' ],
     unmaximize: [ 16, '<path d="M 3 13 H 11 V 5 H 3 V 13 M 5 5 V 3 H 13 V 11 H 11" stroke-width="1px" fill="none"/>' ],
-    menu: [ 24, '<path d="M 3 6 H 21 M 3 12 H 21 M 3 18 H 21" stroke-width="2px" fill="none"/>' ]
+    menu: [ 24, '<path d="M 3 6 H 21 M 3 12 H 21 M 3 18 H 21" stroke-width="2px" fill="none"/>' ],
+
+    point: [ 16, '<circle cx="8" cy="8" r="2" stroke-width="1px" stroke="none" />' ],
+    arrow: [ 16, '<path d="M 6 3 L 11 8 L 6 13" stroke-width="1px" fill="none"/>' ],
+    settings: [ 16, '<circle cx="8" cy="8" r="2" stroke-width="1px" fill="none" /><path d="M 5 3 h 6 L 14 8 L 11 13 h -6 L 2 8 L 5 3 h 1" stroke-width="1px" fill="none" />' ],
+    explorer: [ 16, '<path d="M 2 13 h 12 v -9 h -7 l -1 -1 h -4 V 13 h 1 M 2 6 h 12" stroke-width="1px" fill="none" />' ],
+    puzzle: [ 16, '<path d="M 3 14 V 4 H 6 V 1 H 9 V 4 H 13 V 8 H 10 V 11 H 13 V 14 H 3 V 11" stroke-width="1px" fill="none"/>' ],
+    copy: [ 16, '<path d="M 3 14 V 4 H 11 V 14 H 3 V 13 M 5 4 V 2 H 13 V 12 H 11" stroke-width="1px"  fill="none"/>' ],
+    copy2: [ 16, '<path d="M 3 14 V 6 L 5 4 H 11 V 14 H 3 V 13 M 6 3 7 2 H 13 V 12 H 11" stroke-width="1px"  fill="none"/>' ],
+    paste: [ 16, '<path d="M 3 14 v -12 h 10 v 12 h -10 v -1 M 6 2 v 2 h 4 v -2" stroke-width="1px" fill="none" />' ],
+    delete: [ 16, '<path d="M 2 3 H 14 M 4 3 L 5 14 H 11 L 12 3 M 7 3 V 2 H 9 V 3" stroke-width="1px" fill="none"/>' ],
+    x: [ 16, '<path d="M 2 2 L 14 14 M 2 14 L 14 2" stroke-width="1px" fill="none"/>' ],
 }
 
 export function loadIcon(name) {
