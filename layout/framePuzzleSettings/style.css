@@ -1,0 +1,130 @@
+.settings {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	padding: 0 10px;
+	--color-accent: #1BBF00A6;
+	--color-back: #444;
+	box-sizing: border-box;
+}
+
+.settings__row {
+	width: 100%;
+	display: flex;
+	height: 32px;
+	line-height: 32px;
+	color: var(--text-color);
+}
+
+.setting__label {
+	width: 127px;
+	margin-right: 20px;
+}
+
+.setting__value {
+	position: relative;
+}
+
+.setting__value-prefix {
+	position: absolute;
+	left: 0;
+	transform: translateX(-100%);
+}
+
+
+.settings-bottom {
+	position: absolute;
+	width: 100%;
+	height: 40px;
+	padding: 5px;
+	left: 0;
+	bottom: 0;
+	box-sizing: border-box;
+	text-align: end;
+}
+
+.settings-bottom__button {
+	display: inline-block;
+	height: 30px;
+	padding: 0 10px;
+	border: none;
+	background: var(--color-back);
+	outline: 1px solid #555;
+	color: var(--text-color);
+	cursor: pointer;
+	line-height: 30px;
+	margin-left: 10px;
+}
+
+.settings-bottom__button:hover {
+	color: var(--text-color-accent);
+	background: #555;
+}
+
+.settings-bottom__button:active {
+	color: var(--text-color-accent);
+	background: var(--color-accent);
+}
+
+
+
+input[type="number"] {
+	height: 25px;
+	background: var(--color-back);
+	color: var(--text-color);
+	border: none;
+	padding: 0 5px;
+	font-family: system-ui;
+	font-size: 14px;
+	width: 40px;
+}
+
+input:focus-visible {
+	border: none;
+	color: var(--text-color-accent);
+	outline: 1px solid var(--color-accent);
+}
+
+input::selection {
+	color: var(--text-color-accent);
+	background: var(--color-accent);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	margin: 0;
+}
+
+input[type="checkbox"] {
+	display: none;
+}
+
+.settings__input-checkbox {
+	cursor: pointer;
+	display: inline-block;
+	position: relative;
+	width: 16px;
+	height: 16px;
+	background: var(--color-back);
+	vertical-align: middle;
+}
+
+.settings__input-checkbox__checked {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 16px;
+	height: 16px;
+	background: var(--color-accent);
+}
+
+.settings__input-checkbox__checked svg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	stroke: var(--text-color-accent);
+}

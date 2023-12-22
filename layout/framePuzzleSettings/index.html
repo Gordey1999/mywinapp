@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+	<title>Puzzle Settings</title>
+	<link rel="stylesheet" href="../css/window.css">
+	<link rel="stylesheet" href="../css/tools.css">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body class="--settings">
+
+<div class="header"></div>
+
+<div class="window">
+	<div class="content">
+		<div class="background"></div>
+
+		<div class="settings">
+			<div class="settings__row">
+				<div class="setting__label">Level</div>
+
+				<div class="setting__value">
+					<input type="number" name="level" min="2" max="9">
+				</div>
+			</div>
+			<div class="settings__row">
+				<div class="setting__label">Max size</div>
+
+				<div class="setting__value">
+					<div>
+					<input type="number" name="width" min="100" max="1920">
+					x
+					<input type="number" name="height" min="100" max="1080">
+				</div>
+				</div>
+			</div>
+			<div class="settings__row">
+				<div class="setting__label">Spread</div>
+
+				<div class="setting__value">
+					<input type="number" name="spread" min="0" max="100">
+					%
+				</div>
+			</div>
+			<div class="settings__row">
+				<div class="setting__label">Show solution</div>
+
+				<div class="setting__value">
+					<input type="checkbox" name="showSolution">
+				</div>
+			</div>
+
+			<div class="settings-bottom">
+				<div class="settings-bottom__button js-settings-save">Save</div>
+				<div class="settings-bottom__button js-settings-run">Run</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="../js/jquery.js" type="module"></script>
+<script src="../js/window.js" type="module"></script>
+<script src="renderer.js" type="module"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@ exposeInMainWorld(
     [
         'filesItemList', 'filesMakePreview', 'filesIndexStep',
         'openDetail', 'organizeDir', 'openIndexFiles', 'openPuzzle', 'openSearchCopies', 'openMangaMode',
-        'openFrameMode', 'openFramePuzzle'
+        'openFrameMode', 'openFramePuzzle', 'openFramePuzzleSettings'
     ],
     [
 

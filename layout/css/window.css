@@ -40,7 +40,6 @@ body {
     width: 100%;
     height: 40px;
     background: rgb(62 77 62 / 79%);
-    backdrop-filter: blur(18px);
     z-index: 1000;
     display: flex;
     flex-wrap: nowrap;
@@ -111,9 +110,8 @@ body {
 
 .header__menu-button {
     color: var(--text-color);
-    line-height: 37px;
+    line-height: 40px;
     padding: 0 12px;
-    border-radius: var(--border-radius-s);
     cursor: var(--cursor-pointer);
 }
 
@@ -121,8 +119,34 @@ body {
     color: var(--text-color-accent);
 }
 
+/*** SETTINGS ***/
 
-/*** STYLES ***/
+body.--settings .header {
+	background: #333;
+	box-shadow: none;
+}
+body.--settings .header:after {
+	content: "";
+	position: absolute;
+	width: calc(100% - 14px);
+	height: 1px;
+	bottom: 0;
+	left: 7px;
+	background: #5c5c5c;
+}
+
+body.--settings .background {
+	background: #333;
+}
+
+.header__title {
+	color: var(--text-color);
+	line-height: 40px;
+	padding: 0 12px;
+	-webkit-app-region: drag;
+}
+
+/*** THEMES ***/
 
 .header {
     background: linear-gradient(313deg, #214432, #302d57);
