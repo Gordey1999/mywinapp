@@ -495,7 +495,13 @@ $(window).on('keydown', (e) => {
         const selected = controller.getSelected();
         if (selected === null) { return; }
 
-        window.api.send('openFramePuzzle', selected.getFile().src);
+        window.api.send('openFramePuzzleSettings', selected.getFile().src);
+    }
+    else if (e.code === 'KeyO') {
+	    const selected = controller.getSelected();
+	    if (selected === null) { return; }
+
+	    window.api.send('openFramePuzzle', selected.getFile().src);
     }
 });
 

@@ -43,12 +43,6 @@ ipcMain.on('openFrameMode', (event, src) => {
     frameMode(src);
 })
 
-ipcMain.on('openFramePuzzle', (event, src) => {
-    const framePuzzle = require('./lib/window/framePuzzle');
-    // noinspection JSIgnoredPromiseFromCall
-    framePuzzle(src);
-})
-
 
 
 

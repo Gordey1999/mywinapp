@@ -15,6 +15,8 @@ const icons = {
     paste: [ 16, '<path d="M 3 14 v -12 h 10 v 12 h -10 v -1 M 6 2 v 2 h 4 v -2" stroke-width="1px" fill="none" />' ],
     delete: [ 16, '<path d="M 2 3 H 14 M 4 3 L 5 14 H 11 L 12 3 M 7 3 V 2 H 9 V 3" stroke-width="1px" fill="none"/>' ],
     x: [ 16, '<path d="M 2 2 L 14 14 M 2 14 L 14 2" stroke-width="1px" fill="none"/>' ],
+
+    checked: [ 16, '<path d="M 2 8 l 4 4 l 8 -8" stroke-width="2px" fill="none"/>' ]
 }
 
 export function loadIcon(name) {
@@ -27,7 +29,7 @@ export function loadIcon(name) {
 }
 
 function make(content, width) {
-    const iconHeader = '<svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 #WIDTH# #WIDTH#" width="#WIDTH#px" height="#WIDTH#px">\n';
+    const iconHeader = '<svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 #WIDTH# #WIDTH#" width="#WIDTH#px" height="#WIDTH#px">';
     const iconFooter = '</svg>'
 
     const icon = iconHeader.replaceAll('#WIDTH#', width) + content + iconFooter;

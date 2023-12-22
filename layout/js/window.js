@@ -68,10 +68,15 @@ const $header = $('.header');
 const $window = $('.window');
 const $content = $('.content');
 let menu = null;
+const isSettings = $('body').hasClass('--settings');
 
 function initWindow() {
-    makeBar();
-    createScrollbar($content[0]);
+	if (isSettings) {
+		makeBarSettings();
+	} else {
+		makeBar();
+		createScrollbar($content[0]);
+	}
 }
 
 if ($header.length && $window.length && $content.length) {
@@ -83,7 +88,7 @@ export function addMenuOption(name, callback) {
 }
 
 function makeBar() {
-    const $logo = $('<div>').addClass('header__logo').append($('<img src="../icons/logo2_64.png" alt="logo" />'));
+    const $logo = makeLogo();
 
     const $menu = $('<div>').addClass('header__menu');
 
@@ -96,6 +101,22 @@ function makeBar() {
     $header.append($logo, $menu, $dragArea, $minimize, $maximize, $close);
 
     menu = new Menu($menu, $header);
+}
+
+function makeBarSettings() {
+	const $logo = makeLogo();
+
+	const $title = $('<div>').addClass('header__title').html($('title').html());
+
+	const $dragArea = $('<div>').addClass('header__drag_area');
+
+	const $close = makeClose();
+
+	$header.append($logo, $title, $dragArea, $close);
+}
+
+function makeLogo() {
+	return $('<div>').addClass('header__logo').append($('<img src="../icons/logo2_64.png" alt="logo" />'));
 }
 
 export function makeMinimize() {
