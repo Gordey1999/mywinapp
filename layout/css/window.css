@@ -155,9 +155,16 @@ body.--settings .background {
     background: linear-gradient(313deg, #152b20, #18162b);
 }
 
+body.--theme-green .header {
+    background: linear-gradient(313deg, #254220, #452334);
+}
+body.--theme-green .background {
+    background: linear-gradient(313deg, #152713, #1f1017);
+}
+
 body.--theme-red .header {
-    background: linear-gradient(313deg, #2c4f26, #5d2f46);
+	background: linear-gradient(89deg, #1f2948, #3d2347)
 }
 body.--theme-red .background {
-    background: linear-gradient(313deg, #182b15, #2b1620);
+	background: linear-gradient(90deg, #0e1220, #231428)
 }

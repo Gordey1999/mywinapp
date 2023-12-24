@@ -11,7 +11,7 @@ export class FilesIndexer {
         this.#progressEl = document.querySelector('.progress');
         this.#progressBarEl = this.#progressEl.querySelector('.bar');
 
-        document.addEventListener('scroll', this.onScroll.bind(this));
+        $('.content').on('scroll', this.onScroll.bind(this));
 
         window.api.receive('filesMakePreviewResult', this.onMakePreview.bind(this));
         window.api.receive('filesIndexStepResult', this.#indexNext.bind(this));

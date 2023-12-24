@@ -90,7 +90,13 @@ export function addMenuOption(name, callback) {
 function makeBar() {
     const $logo = makeLogo();
 
-    const $menu = $('<div>').addClass('header__menu');
+	let $title;
+	if ($header.hasClass('--show-menu')) {
+		$title = $('<div>').addClass('header__menu');
+		menu = new Menu($title, $header);
+	} else {
+		$title = $('<div>').addClass('header__title').html($('title').html());
+	}
 
     const $dragArea = $('<div>').addClass('header__drag_area');
 
@@ -98,9 +104,7 @@ function makeBar() {
     const $close = makeClose();
     const $maximize = makeMaximize();
 
-    $header.append($logo, $menu, $dragArea, $minimize, $maximize, $close);
-
-    menu = new Menu($menu, $header);
+    $header.append($logo, $title, $dragArea, $minimize, $maximize, $close);
 }
 
 function makeBarSettings() {
