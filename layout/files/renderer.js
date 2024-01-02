@@ -487,32 +487,33 @@ class FilesController {
 
 
 const container = document.querySelector('.files-container');
-const sectionsContainer = document.querySelector('.sections');
+const $sectionsContainer = $('.sections');
 
 window.keyboardController = new KeyboardController();
 
-let dirTree = new DirTree(sectionsContainer, [{ name: 'root', src: '' }]);
+const dirTreeRoot = new DirTree($sectionsContainer, []);
+let dirTree = dirTreeRoot;
 
 const controller = new FilesController(container);
 
-
-window.api.receive('filesItemListResult', (dirs, files) => {
-    dirTree.setChildDirs(dirs);
-    controller.setFiles(files);
-    fillDirInfo({ count: files.length });
+window.api.invoke('filesInit').then((result) => {
+    dirTreeRoot.makeTree(result);
 });
 
 window.api.receive('filesSetSelected', (selectedId) => {
     controller.setPointer(selectedId);
 });
 
-window.addEventListener('selectSection', (e) => {
-    dirTree = e.detail.dirTree;
-    fillDirInfo({ path: e.detail.src });
-    window.api.send('filesItemList', e.detail.src);
-})
+$(window).on('selectSection', (e, dirTreeObj, src) => {
+    dirTree = dirTreeObj;
+    fillDirInfo({ path: src });
 
-dirTree.initRoot();
+    window.api.invoke('filesItemList', src).then((result) => {
+        dirTree.setChildDirs(result.dirs);
+        controller.setFiles(result.files);
+        fillDirInfo({ count: result.files.length });
+    });
+});
 
 
 function fillDirInfo(info) {

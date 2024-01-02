@@ -4,15 +4,14 @@ const { exposeInMainWorld } = require("../preload");
 
 exposeInMainWorld(
     [
-        'filesItemList', 'filesMakePreview', 'filesIndexStep',
         'openDetail', 'organizeDir', 'openIndexFiles', 'openPuzzle', 'openSearchCopies', 'openMangaMode',
         'openFrameMode', 'openFramePuzzle', 'openFramePuzzleSettings'
     ],
     [
-
+        'filesInit', 'filesItemList', 'filesMakePreview', 'filesIndexStep'
     ],
     [
-        'filesItemListResult', 'filesMakePreviewResult', 'filesIndexStepResult', 'filesSetSelected',
+        'filesSetSelected',
         'organizeDirResult'
     ]
 )

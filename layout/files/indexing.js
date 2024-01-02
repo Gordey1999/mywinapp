@@ -12,9 +12,6 @@ export class FilesIndexer {
         this.#progressBarEl = this.#progressEl.querySelector('.bar');
 
         $('.content').on('scroll', this.onScroll.bind(this));
-
-        window.api.receive('filesMakePreviewResult', this.onMakePreview.bind(this));
-        window.api.receive('filesIndexStepResult', this.#indexNext.bind(this));
     }
 
     setFiles(items) {
@@ -78,7 +75,9 @@ export class FilesIndexer {
         }
 
         const file = this.#items[this.#pointer].getFile();
-        window.api.send('filesMakePreview', file.src);
+
+        window.api.invoke('filesMakePreview', file.src)
+            .then(this.onMakePreview.bind(this, file.src));
     }
 
     onMakePreview(src, preview) {
@@ -114,6 +113,9 @@ export class FilesIndexer {
         }
 
         this.#setProgress(status / this.#items.length * 100);
-        setTimeout(() => window.api.send('filesIndexStep'), 5);
+        setTimeout(() => {
+            window.api.invoke('filesIndexStep')
+                .then(this.#indexNext.bind(this));
+        }, 10);
     }
 }
