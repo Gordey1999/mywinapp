@@ -1,5 +1,3 @@
-
-const { contextBridge, webFrame, ipcRenderer } = require('electron');
 const { exposeInMainWorld } = require("../preload");
 
 exposeInMainWorld(
@@ -13,5 +11,6 @@ exposeInMainWorld(
     [
         'filesSetSelected',
         'organizeDirResult'
-    ]
+    ],
+    __dirname
 )

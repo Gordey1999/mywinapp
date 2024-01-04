@@ -1,6 +1,7 @@
 import {createScrollbar, makeContextMenu} from "./tools.js";
 import {loadIcon} from "./icons.js";
 
+window.assets.addCss('window.css');
 
 class Menu {
     _$menuBtn = null;

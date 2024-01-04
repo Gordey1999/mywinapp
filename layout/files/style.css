@@ -1,3 +1,6 @@
+body {
+    background: black;
+}
 
 .files-container {
     width: 100%;
@@ -149,117 +152,12 @@
 }
 
 
-/*** DIR PATH ***/
-
-.dir-path {
-    display: flex;
-    position: relative;
-    height: 32px;
-    padding: 4px 20px;
-    box-sizing: border-box;
-    width: 100%;
-    cursor: text;
-    justify-content: center;
-}
-
-.dir-path:hover {
-    background: #00000044;
-}
-
-.dir-path.--calculate {
-    min-width: fit-content;
-    width: fit-content;
-    position: fixed;
-}
-
-.dir-path__item {
-    color: var(--text-color);
-    stroke: var(--text-color);
-    height: 24px;
-    display: inline-block;
-    line-height: 24px;
-    margin: 0;
-    padding: 0 4px;
-    cursor: pointer;
-    flex-wrap: nowrap;
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.dir-path__item.--hidden {
-    visibility: hidden;
-}
-
-.dir-path:hover .dir-path__item.--hidden {
-    visibility: visible;
-}
-
-.dir-path__item:hover {
-    color: var(--text-color-accent);
-    stroke: var(--text-color-accent);
-    background: #a0a0a01c;
-}
-
-.dir-path__item:active, .dir-path__item.--active {
-    color: var(--text-color-accent);
-    stroke: var(--text-color-accent);
-    background: rgba(160, 160, 160, 0.28);
-    visibility: visible;
-}
-
-.dir-path__edit-area {
-    width: 30px;
-}
-
-.dir-path__item svg {
-    padding-top: 1px;
-    height: 100%;
-    display: inline-block;
-}
-
-.dir-path__input {
-    display: none;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: none;
-    border: none;
-    color: var(--text-color);
-    font-family: system-ui;
-    padding: 0 20px;
-    font-size: 1em;
-    line-height: 100%;
-    letter-spacing: .1em;
-    box-sizing: border-box;
-}
-
-.dir-path__input:focus-visible {
-    border: none;
-    outline: none;
-}
-
-.dir-path__input::selection {
-    background: #fff4;
-    color: var(--text-color-accent);
-}
-
-.dir-path.--edit-mode {
-    background: #00000044;
-}
-
-.dir-path.--edit-mode .dir-path__item {
-    visibility: hidden !important;
-}
-
-.dir-path.--edit-mode .dir-path__input {
-    display: block;
-}
 
 /*** DIR PATH HEADER ***/
+
+.dir-path {
+    justify-content: center;
+}
 
 .dir-path-container {
     order: 40;
@@ -287,8 +185,8 @@
 
 @media screen and (max-width: 800px) {
     .header {
-        flex-wrap: wrap;
-        height: 80px;
+        flex-wrap: wrap !important;
+        height: 80px !important;
     }
 
     .header__title {

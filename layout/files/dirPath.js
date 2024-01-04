@@ -1,6 +1,8 @@
 import {loadIcon} from "../assets/js/icons.js";
 import {makeContextMenu} from "../assets/js/tools.js";
 
+window.assets.addCss('dirPath.css');
+
 export class DirPath {
     _$container = null;
     _separator = "\\";

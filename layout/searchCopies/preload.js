@@ -1,5 +1,5 @@
 
-const { contextBridge, webFrame, ipcRenderer } = require('electron')
+const { webFrame } = require('electron')
 const {exposeInMainWorld} = require("../preload");
 
 exposeInMainWorld(
@@ -11,7 +11,8 @@ exposeInMainWorld(
     ],
     [
         'searchCopiesInitResult', 'searchCopiesStepResult'
-    ]
+    ],
+    __dirname
 )
 
 window.addEventListener('DOMContentLoaded', () => {

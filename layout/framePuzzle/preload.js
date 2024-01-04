@@ -10,5 +10,6 @@ exposeInMainWorld(
     ],
     [
         'framePuzzleSolved'
-    ]
+    ],
+    __dirname
 )

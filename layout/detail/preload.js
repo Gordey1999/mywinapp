@@ -1,22 +1,18 @@
+const { webFrame } = require('electron');
+const { exposeInMainWorld } = require("../preload");
 
-const { contextBridge, webFrame, ipcRenderer } = require('electron')
+exposeInMainWorld(
+    [
+        'detailInit', 'closeDetail', 'detailOpenInExplorer'
+    ],
+    [
 
-contextBridge.exposeInMainWorld('api', {
-    send: (channel, data) => {
-        // whitelist channels
-        let validChannels = ['detailInit', 'closeDetail', 'detailOpenInExplorer'];
-        if (validChannels.includes(channel)) {
-            ipcRenderer.send(channel, data);
-        }
-    },
-    receive: (channel, func) => {
-        let validChannels = ['detailInitResult'];
-        if (validChannels.includes(channel)) {
-            // Deliberately strip event as it includes `sender`
-            ipcRenderer.on(channel, (event, ...args) => func(...args));
-        }
-    }
-})
+    ],
+    [
+        'detailInitResult'
+    ],
+    __dirname
+)
 
 window.addEventListener('DOMContentLoaded', () => {
     webFrame.setVisualZoomLevelLimits(1, 4);

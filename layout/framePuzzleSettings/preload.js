@@ -3,13 +3,13 @@ const {exposeInMainWorld} = require("../preload");
 
 exposeInMainWorld(
     [
-		'framePuzzleSettingsSave',
-		'framePuzzleSettingsRun'
+		'framePuzzleSettingsSave', 'framePuzzleSettingsRun'
     ],
     [
         'framePuzzleSettingsInit'
     ],
 	[
 
-	]
+	],
+	__dirname
 )

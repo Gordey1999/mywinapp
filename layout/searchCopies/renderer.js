@@ -1,4 +1,5 @@
 import {createNode} from "../assets/js/tools.js";
+import "../assets/js/window.js";
 
 (function() {
     const progressEl = document.querySelector('.progress');

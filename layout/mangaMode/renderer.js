@@ -1,6 +1,7 @@
 "use strict";
 
 import {adaptiveGrid, createNode} from "../assets/js/tools.js";
+import "../assets/js/window.js";
 
 window.api.receive('mangaModeInitResult', (mangaList) => {
 

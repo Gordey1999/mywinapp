@@ -10,5 +10,6 @@ exposeInMainWorld(
     ],
     [
         'mangaModeInitResult'
-    ]
+    ],
+    __dirname
 )

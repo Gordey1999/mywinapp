@@ -1,5 +1,8 @@
 import {loadIcon} from "./icons.js";
 
+window.assets.addCss('tools.css');
+
+/** @deprecated */
 export function createNode(tag, className = null, parent = null) {
     const el = document.createElement(tag);
 

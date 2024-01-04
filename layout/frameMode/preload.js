@@ -10,5 +10,6 @@ exposeInMainWorld(
     ],
     [
 
-    ]
+    ],
+    __dirname
 )
