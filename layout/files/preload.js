@@ -8,7 +8,7 @@ exposeInMainWorld(
         'openFrameMode', 'openFramePuzzle', 'openFramePuzzleSettings'
     ],
     [
-        'filesInit', 'filesItemList', 'filesMakePreview', 'filesIndexStep'
+        'filesInit', 'filesItemList', 'filesMakePreview', 'filesIndexStep', 'dirPathList'
     ],
     [
         'filesSetSelected',

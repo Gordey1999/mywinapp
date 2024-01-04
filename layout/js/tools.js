@@ -178,13 +178,28 @@ class Scrollbar {
     }
 }
 
+let contextMenu = null;
 
-export class ContextMenu {
+export function makeContextMenu(menu, x, y, type = null, onCloseCallback) {
+    if (contextMenu !== null) {
+        contextMenu.destroy();
+    }
+
+    let listClass = ContextMenuList;
+    if (type === 'header') {
+        listClass = ContextMenuListHeader;
+    }
+
+    contextMenu = new ContextMenu(listClass, menu, onCloseCallback, x, y);
+}
+
+class ContextMenu {
     _contextMenuList = null;
-    closeTimeout = 200;
+    _closeCallback = null;
 
-    constructor(menu, x, y) {
-        this._contextMenuList = new ContextMenuList(menu, this, x, y);
+    constructor(listClass, menu, closeCallback = null, ...args) {
+        this._contextMenuList = new listClass(menu, this, ...args);
+        this._closeCallback = closeCallback;
 
 		setTimeout(() => {
 			this._bind('on');
@@ -209,6 +224,9 @@ export class ContextMenu {
 	}
 
     destroy() {
+        if (this._closeCallback !== null) { this._closeCallback() }
+        this._closeCallback = null;
+
         this._contextMenuList.destroy();
 	    this._bind('off');
     }
@@ -219,6 +237,8 @@ class ContextMenuList {
     _$container = null;
     _controller = null
 	_direction = null;
+    _offsetTop = 40;
+    _offsetBottom = 10;
 
 	_itemMap = [];
 
@@ -268,11 +288,11 @@ class ContextMenuList {
 		const $item = $(e.target).closest('.context-menu__item');
 		if (!$item.length) { return; }
 
-		if (this._active.$el === $item) { return }
+		if (this._active.$el?.get(0) === $item.get(0)) { return }
 
 		const item = this._getItem($item);
 
-		if (this._active.childList) {
+		if (this._active.childList !== null) {
 			const mx = e.screenX;
 			const my = e.screenY;
 
@@ -314,10 +334,16 @@ class ContextMenuList {
 	}
 
 	_openChildList($item, item) {
-		const { left, top } = $item.offset();
-		const width = $item.outerWidth();
+        const { left, top } = $item.offset();
+        const width = $item.outerWidth();
 
-		this._active.childList = new ContextMenuList(item.children, this._controller, left + width, top, this._direction, width);
+        if (typeof item.children === 'function') {
+            item.children().then(result => {
+                this._active.childList = new ContextMenuList(result, this._controller, left + width, top, this._direction, width);
+            });
+        } else {
+            this._active.childList = new ContextMenuList(item.children, this._controller, left + width, top, this._direction, width);
+        }
 	}
 
 	_closeChildList() {
@@ -388,12 +414,19 @@ class ContextMenuList {
     _calculatePosition(x, y, direction, parentWidth) {
         const winWidth = $(window).width();
         const winHeight = $(window).height();
+        const maxHeight = winHeight - this._offsetTop - this._offsetBottom;
 
         const width = this._$container.outerWidth();
         const height = this._$container.outerHeight();
 
-        if (y + height > winHeight) {
-            y = winHeight - height - 10;
+        y = Math.max(y, this._offsetTop);
+
+        if (height > maxHeight) {
+            y = this._offsetTop;
+            const padding = height - this._$container.height();
+            this._$container.height(maxHeight - padding);
+        } else if (y + height > winHeight - this._offsetBottom) {
+            y = winHeight - height - this._offsetBottom;
         }
 
 		if (direction === 'left') {
@@ -417,5 +450,13 @@ class ContextMenuList {
 	    this._active.childList?.destroy();
 	    this._active.childList = null;
         this._$container.remove();
+    }
+}
+
+class ContextMenuListHeader extends ContextMenuList {
+    constructor(...args) {
+        super(...args);
+
+        this._$container.addClass('--header');
     }
 }

@@ -46,12 +46,21 @@ body {
     box-shadow: 0 0 20px 11px #00000099;
 }
 
+.header > div {
+    height: 40px;
+}
+
 .header__icon {
     width: 44px;
     height: 40px;
     padding: 12px 14px;
     cursor: pointer;
     box-sizing: border-box;
+    order: 100;
+}
+
+.header__icon.--first {
+    margin-left: auto;
 }
 
 .header__icon svg {
@@ -72,6 +81,7 @@ body {
     padding: 7px;
     cursor: pointer;
     box-sizing: border-box;
+    order: 1;
 }
 
 .header__logo img {
@@ -84,12 +94,14 @@ body {
     flex-grow: 1;
     height: 100%;
     -webkit-app-region: drag;
+    order: 70;
 }
 
 .header__menu {
     display: flex;
     flex-wrap: nowrap;
     white-space: nowrap;
+    order: 10;
 }
 
 .header__menu-small {
@@ -108,15 +120,16 @@ body {
     stroke: var(--text-color-accent);
 }
 
-.header__menu-button {
+.header__title {
     color: var(--text-color);
     line-height: 40px;
     padding: 0 12px;
-    cursor: var(--cursor-pointer);
-}
-
-.header__menu-button:hover {
-    color: var(--text-color-accent);
+    -webkit-app-region: drag;
+    order: 20;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /*** SETTINGS ***/
@@ -137,13 +150,6 @@ body.--settings .header:after {
 
 body.--settings .background {
 	background: #333;
-}
-
-.header__title {
-	color: var(--text-color);
-	line-height: 40px;
-	padding: 0 12px;
-	-webkit-app-region: drag;
 }
 
 /*** THEMES ***/

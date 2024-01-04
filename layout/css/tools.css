@@ -118,6 +118,11 @@ body.--border-rounded {
     padding: 8px;
     box-shadow: 0 0 20px 11px #00000099;
     z-index: 10000;
+    overflow-x: scroll;
+}
+
+.context-menu.--header {
+    box-shadow: 0 15px 20px 11px #00000099;
 }
 
 .context-menu__item {
@@ -156,6 +161,10 @@ body.--border-rounded {
 .context-menu__item-name {
     line-height: 32px;
     flex-grow: 1;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .context-menu__separator {

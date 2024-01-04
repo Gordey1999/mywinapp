@@ -20,6 +20,8 @@ export class KeyboardController {
     }
 
     #onKeyboard(e) {
+        if (e.target.tagName === 'INPUT') { return; }
+
         let triggered = true;
 
 		this.#pressed.shift = e.shiftKey;

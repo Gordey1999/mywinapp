@@ -1,10 +1,11 @@
 "use strict";
 
 import {KeyboardController} from "../js/keyboard.js";
-import {adaptiveGrid, createNode, ContextMenu} from "../js/tools.js";
+import {adaptiveGrid, createNode, makeContextMenu} from "../js/tools.js";
 import {DirTree} from "./dirTree.js";
 import {FilesIndexer} from "./indexing.js";
-import {addMenuOption} from "../js/window.js";
+import {addMenuOption, setTitle} from "../js/window.js";
+import {DirPath} from "./dirPath.js";
 
 /*
 cntrl + x - для перетаскивания? cntrl уже занять
@@ -318,6 +319,7 @@ class FilesController {
     }
 
 	#select(i, shift, control) {
+        setTitle(this.#items[i].getFile().name);
         return;
         const options = this.#selectOptions;
 
@@ -481,7 +483,7 @@ class FilesController {
             }
         ];
 
-        new ContextMenu(menu, evt.x, evt.y);
+        makeContextMenu(menu, evt.x, evt.y);
     }
 }
 
@@ -494,26 +496,36 @@ window.keyboardController = new KeyboardController();
 const dirTreeRoot = new DirTree($sectionsContainer, []);
 let dirTree = dirTreeRoot;
 
+const dirPath = new DirPath($('.dir-path'));
+
 const controller = new FilesController(container);
 
 window.api.invoke('filesInit').then((result) => {
-    dirTreeRoot.makeTree(result);
+    openSection(result.dirPath, result.dirName);
 });
 
 window.api.receive('filesSetSelected', (selectedId) => {
     controller.setPointer(selectedId);
 });
 
-$(window).on('selectSection', (e, dirTreeObj, src) => {
-    dirTree = dirTreeObj;
-    fillDirInfo({ path: src });
+$(window).on('selectSection', (e, src) => {
+    openSection(src);
+});
 
+function openSection(src) {
     window.api.invoke('filesItemList', src).then((result) => {
+        if (result.error) { return }
+
+        const dirName = result.src.split('\\').pop();
+        setTitle(dirName);
+        dirPath.setPath(result.src);
+
+        fillDirInfo({ path: result.src });
         dirTree.setChildDirs(result.dirs);
         controller.setFiles(result.files);
         fillDirInfo({ count: result.files.length });
     });
-});
+}
 
 
 function fillDirInfo(info) {
