@@ -1,4 +1,5 @@
-import {createScrollbar, makeContextMenu} from "./tools.js";
+import {createScrollbar} from "./tools.js";
+import {makeContextMenu} from "./contextMenu.js";
 import {loadIcon} from "./icons.js";
 
 window.assets.addCss('window.css');

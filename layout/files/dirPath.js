@@ -1,5 +1,5 @@
 import {loadIcon} from "../assets/js/icons.js";
-import {makeContextMenu} from "../assets/js/tools.js";
+import {makeContextMenu} from "../assets/js/contextMenu.js";
 
 window.assets.addCss('dirPath.css');
 
