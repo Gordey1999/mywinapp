@@ -90,7 +90,7 @@ function makeBarSettings() {
 }
 
 function makeLogo() {
-	return $('<div>').addClass('header__logo').append($('<img src="../icons/logo2_64.png" alt="logo" />'));
+	return $('<div>').addClass('header__logo').append($('<img src="../assets/icons/logo2_64.png" alt="logo" />'));
 }
 
 let titleTimeout = null;

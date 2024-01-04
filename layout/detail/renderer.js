@@ -1,4 +1,4 @@
-import {createNode} from "../js/tools.js";
+import {createNode} from "../assets/js/tools.js";
 
 class VideoPlayer {
     #video = null;

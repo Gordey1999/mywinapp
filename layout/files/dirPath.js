@@ -1,5 +1,5 @@
-import {loadIcon} from "../js/icons.js";
-import {makeContextMenu} from "../js/tools.js";
+import {loadIcon} from "../assets/js/icons.js";
+import {makeContextMenu} from "../assets/js/tools.js";
 
 export class DirPath {
     _$container = null;

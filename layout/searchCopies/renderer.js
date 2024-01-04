@@ -1,4 +1,4 @@
-import {createScrollbar, createNode, scrollToElement} from "../js/tools.js";
+import {createNode} from "../assets/js/tools.js";
 
 (function() {
     const progressEl = document.querySelector('.progress');

@@ -1,10 +1,10 @@
 "use strict";
 
-import {KeyboardController} from "../js/keyboard.js";
-import {adaptiveGrid, createNode, makeContextMenu} from "../js/tools.js";
+import {KeyboardController} from "../assets/js/keyboard.js";
+import {adaptiveGrid, createNode, makeContextMenu} from "../assets/js/tools.js";
 import {DirTree} from "./dirTree.js";
 import {FilesIndexer} from "./indexing.js";
-import {addMenuOption, setTitle} from "../js/window.js";
+import {addMenuOption, setTitle} from "../assets/js/window.js";
 import {DirPath} from "./dirPath.js";
 
 /*
@@ -53,7 +53,7 @@ class FileItem {
             if (this.#file.preview !== null) {
                 this.#img.src = this.#file.preview;
             } else {
-                this.#img.src = '../img/image_back.png';
+                this.#img.src = '../assets/img/image_back.png';
             }
 
             this.#img.loading = 'lazy';

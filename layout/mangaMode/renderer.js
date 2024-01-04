@@ -1,6 +1,6 @@
 "use strict";
 
-import {adaptiveGrid, createNode, createScrollbar} from "../js/tools.js";
+import {adaptiveGrid, createNode} from "../assets/js/tools.js";
 
 window.api.receive('mangaModeInitResult', (mangaList) => {
 

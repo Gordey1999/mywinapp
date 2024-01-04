@@ -1,4 +1,3 @@
-import {createNode, scrollToElement} from "../js/tools.js";
 
 export class DirTree {
     _$container = null;

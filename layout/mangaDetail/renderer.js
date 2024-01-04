@@ -1,4 +1,4 @@
-import {createNode, createScrollbar} from "../js/tools.js";
+import {createNode, createScrollbar} from "../assets/js/tools.js";
 
 
 window.api.receive('mangaDetailInitResult', (files) => {

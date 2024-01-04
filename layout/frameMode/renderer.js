@@ -1,6 +1,6 @@
 "use strict";
 
-import {makeClose, makeMinimize} from "../js/window.js";
+import {makeClose, makeMinimize} from "../assets/js/window.js";
 
 $('.head-buttons')
     .append(makeMinimize())
