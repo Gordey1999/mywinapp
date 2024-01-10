@@ -104,6 +104,12 @@ ipcMain.on('openInExplorer', (event, src) => {
     shell.showItemInFolder(src);
 })
 
+ipcMain.on('openInPaint', (event, src) => {
+    if (src.includes('"') || src.includes("'")) { return; }
+    const { exec } = require("child_process");
+    exec(`"${settings.editApp}" "${src}"`);
+})
+
 
 
 

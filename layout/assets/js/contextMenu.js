@@ -63,6 +63,7 @@ class ContextMenuList {
     _direction = null;
     _offsetTop = 40;
     _offsetBottom = 10;
+    _loadingChildren = false;
 
     _itemMap = [];
 
@@ -109,6 +110,7 @@ class ContextMenuList {
     }
 
     _onMouseMove(e) {
+        if (this._loadingChildren) { return; }
         const $item = $(e.target).closest('.context-menu__item');
         if (!$item.length) { return; }
 
@@ -162,7 +164,9 @@ class ContextMenuList {
         const width = $item.outerWidth();
 
         if (typeof item.children === 'function') {
+            this._loadingChildren = true;
             item.children().then(result => {
+                this._loadingChildren = false;
                 this._active.childList = new ContextMenuList(result, this._controller, left + width, top, this._direction, width);
             });
         } else {

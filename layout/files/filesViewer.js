@@ -422,6 +422,12 @@ export class FilesController {
                     window.api.send('openInExplorer', selected.getFile().src);
                 }
             },
+            {
+                name: 'Edit',
+                callback: () => {
+                    window.api.send('openInPaint', selected.getFile().src);
+                }
+            },
             innerList,
             {
                 name: 'Mark...'
