@@ -3,7 +3,7 @@ const { exposeInMainWorld } = require("../preload");
 
 exposeInMainWorld(
     [
-        'detailInit', 'closeDetail', 'detailOpenInExplorer'
+        'detailInit', 'closeDetail', 'openInExplorer'
     ],
     [
 

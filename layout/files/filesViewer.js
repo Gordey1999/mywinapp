@@ -1,9 +1,8 @@
 import {createNode} from "../assets/js/tools.js";
-import {FilesIndexer} from "./indexing.js";
 import {setTitle} from "../assets/js/window.js";
 import {makeContextMenu} from "../assets/js/contextMenu.js";
 
-let itemsInRow = 10;
+let itemsInRow = 9;
 
 $('.files-container').on('adaptiveGridChanged', (e, adaptiveGridChanged) => {
     itemsInRow = adaptiveGridChanged;
@@ -57,7 +56,7 @@ export class FileItem {
 
 
     showPreview() {
-        return;
+        return // todo preview
         if (this.#preview) { return; }
         this.#preview = new FilePreview(this);
     }
@@ -213,15 +212,12 @@ export class FilesController {
         controlUpI: null,
     };
 
-    #indexer = null;
-
     //#lastScroll = 0;
 
     constructor(container) {
         this.#el = container;
 
         this.#items = [];
-        this.#indexer = new FilesIndexer();
 
         document.querySelector('.content').addEventListener('scroll', this.optimizeItemsRender.bind(this));
     }
@@ -249,8 +245,10 @@ export class FilesController {
         }
 
         this.optimizeItemsRender();
+    }
 
-        this.#indexer.setFiles(this.#items);
+    getItems() {
+        return this.#items;
     }
 
     onKeyboardEvent(event, i, el, evt) {
@@ -420,6 +418,9 @@ export class FilesController {
             {
                 name: 'Open in Explorer',
                 icon: 'explorer',
+                callback: () => {
+                    window.api.send('openInExplorer', selected.getFile().src);
+                }
             },
             innerList,
             {

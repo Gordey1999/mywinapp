@@ -1,4 +1,4 @@
-const { app, ipcMain} = require('electron')
+const { app, ipcMain, shell} = require('electron')
 const path = require('path')
 const settings = require('./lib/settings');
 
@@ -98,6 +98,10 @@ ipcMain.on('openMangaMode', (event, currentDir) => {
 ipcMain.on('openFrameMode', (event, src) => {
     const frameMode = require('./lib/window/frameMode');
     frameMode(src);
+})
+
+ipcMain.on('openInExplorer', (event, src) => {
+    shell.showItemInFolder(src);
 })
 
 

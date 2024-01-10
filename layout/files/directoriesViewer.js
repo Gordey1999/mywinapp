@@ -22,11 +22,22 @@ export class DirectoriesViewer {
     }
 
     setPointer(name) {
-        const $el = this._$el.find(`.directories__item[data-name="${name}"]`);
+        const $el = this._getByName(name);
         if ($el.length === 0) { return false; }
 
         window.keyboardController.pointTo(this, $el.get(0));
         return true;
+    }
+
+    setPreview(name, src) {
+        const $img = this._getByName(name).find('img');
+        if ($img.length === 0) { return false; }
+
+        $img.attr('src', src);
+    }
+
+    _getByName(name) {
+        return this._$el.find(`.directories__item[data-name="${name}"]`);
     }
 
     getPointer() {
@@ -43,7 +54,7 @@ export class DirectoriesViewer {
             const $block = $('<div>').addClass('directories__item').css('order', 10);
 
 
-            if (typeof dir.preview !== 'undefined') {
+            if (dir.preview) {
                 $block.append(this._makeImages(dir));
             }
 
@@ -112,10 +123,10 @@ export class DirectoriesViewer {
         return $el;
     }
 
-    _makeImages(dir) {
+    _makeImages() {
         const $imagesBlock = $('<div>').addClass('directories__item-images');
 
-        const $image = $('<img>').attr('src', dir.preview ?? '../assets/img/image_back.png');
+        const $image = $('<img>').attr('src', '../assets/img/image_back.png');
         $imagesBlock.append($image);
 
         return $imagesBlock;

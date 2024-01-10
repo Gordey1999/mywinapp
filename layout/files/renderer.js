@@ -1,12 +1,13 @@
 "use strict";
 
 import {addMenuOption, setTitle} from "../assets/js/window.js";
-import {scrollToTop} from "../assets/js/tools.js";
+import {getScroll, scrollToTop, setScroll} from "../assets/js/tools.js";
 import {KeyboardController} from "../assets/js/keyboard.js";
 import {DirectoriesViewer} from "./directoriesViewer.js";
 import {DirPath} from "./dirPath.js";
 import {FilesController} from "./filesViewer.js";
 import {MovementHistory} from "./history.js";
+import {DirectoryLoader, PreviewLoader} from "./indexing.js";
 
 /*
 cntrl + x - для перетаскивания? cntrl уже занять
@@ -32,18 +33,14 @@ $(window).on('selectSection', (e, src) => {
     openPath(src);
 });
 
-function openPath(src, name = null, fromHistory = false) {
+function openPath(src, name = null, scroll = null, fromHistory = false) {
     if (dirPath.getPath() === src && name) {
         pointTo(name);
         return;
     }
 
     if (!fromHistory) {
-        const saved = movementHistory.search(src);
-        if (saved?.pointTo) {
-            name = saved.pointTo;
-        }
-        movementHistory.update(getPointer());
+        movementHistory.update(getPointer(), getScroll());
     }
 
     window.api.invoke('filesItemList', src).then((result) => {
@@ -58,14 +55,18 @@ function openPath(src, name = null, fromHistory = false) {
         filesViewer.setFiles(result.files);
         keyboardController.clearPointer();
 
+        // noinspection JSIgnoredPromiseFromCall
+        runLoaders(result);
+
         if(name) {
             pointTo(name);
+            setScroll(scroll);
         } else {
             pointTo(result.dirs[0]?.name ?? result.files[0]?.name);
         }
 
         if (!fromHistory) {
-            movementHistory.add(dirPath.getPath(), name);
+            movementHistory.add(dirPath.getPath(), name, getScroll());
         }
     });
 }
@@ -83,23 +84,36 @@ function getPointer() {
     return filesViewer.getPointer();
 }
 
+const directoryLoader = new DirectoryLoader();
+const previewLoader = new PreviewLoader();
+
+async function runLoaders(result) {
+    directoryLoader.stop();
+    previewLoader.stop();
+
+    try {
+        await directoryLoader.start(result.dirs, dirViewer);
+        await previewLoader.start(filesViewer.getItems());
+    } catch (e) {}
+}
+
 window.api.receive('filesOpenPath', (src, name) => {
     openPath(src, name);
 });
 
 hotkeys('backspace, q', () => {
-    movementHistory.update(getPointer());
+    movementHistory.update(getPointer(), getScroll());
     const prev = movementHistory.prev();
     if (prev !== null) {
-        openPath(prev.src, prev.pointTo, true);
+        openPath(prev.src, prev.pointTo, prev.scroll, true);
     }
 });
 
 hotkeys('=, e', () => {
-    movementHistory.update(getPointer());
+    movementHistory.update(getPointer(), getScroll());
     const next = movementHistory.next();
     if (next !== null) {
-        openPath(next.src, next.pointTo, true);
+        openPath(next.src, next.pointTo, next.scroll, true);
     }
 });
 

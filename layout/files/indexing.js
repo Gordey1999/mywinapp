@@ -1,121 +1,200 @@
 
-export class FilesIndexer {
-    #items = null;
-    #resizedCount = 0;
-    #pointer = null;
-    #pointerScroll = null;
-    #progressEl = null;
-    #progressBarEl = null;
+class AbstractLoader {
+    _progressEl = null;
+    _progressBarEl = null;
+    _resolve = null;
+    _reject = null;
 
     constructor() {
-        this.#progressEl = document.querySelector('.progress');
-        this.#progressBarEl = this.#progressEl.querySelector('.bar');
-
-        $('.content').on('scroll', this.onScroll.bind(this));
+        this._progressEl = document.querySelector('.progress');
+        this._progressBarEl = this._progressEl.querySelector('.bar');
     }
 
-    setFiles(items) {
-        this.#items = items;
+    _start(blue = false) {
+        this._showProgress(blue);
 
-        this.#hideProgress();
+        return new Promise((resolve, reject) => {
+            this._resolve = resolve;
+            this._reject = reject;
+        });
+    }
 
-        this.#pointer = 0;
-        this.#pointerScroll = null;
+    _showProgress(blue = false) {
+        this._progressEl.classList.add('active');
+        if (blue)
+            this._progressEl.classList.add('blue');
+        else
+            this._progressEl.classList.remove('blue');
+    }
+    _setProgress(percent) {
+        this._progressBarEl.style.width = percent + '%';
+    }
+    _hideProgress() {
+        this._progressEl.classList.remove('active');
+    }
 
-        this.#resizedCount = 0;
+    _done() {
+        this._hideProgress();
+        this._resolve();
+    }
+    stop() {
+        this._hideProgress();
+        if (this._reject !== null) {
+            this._reject('stop');
+        }
+    }
+}
+
+
+export class DirectoryLoader extends AbstractLoader {
+    _dirs = null;
+    _dirsCount = 0;
+    _dirViewer = null;
+
+    start(dirs, dirViewer) {
+        const promise = this._start();
+
+        this._dirs = dirs.filter(dir => dir.preview).reverse();
+        this._dirsCount = dirs.length;
+        this._dirViewer = dirViewer;
+
+        this._resizeNext();
+
+        return promise;
+    }
+
+    _resizeNext() {
+        if (this._dirs.length === 0) {
+            this._done();
+            return;
+        }
+
+        const dir = this._dirs.pop();
+
+        window.api.invoke('filesMakePreview', dir.preview)
+            .then(this.onMakePreview.bind(this, dir.name));
+    }
+
+    onMakePreview(name, preview) {
+        this._dirViewer.setPreview(name, preview);
+
+        this._setProgress((this._dirsCount - this._dirs.length) / this._dirsCount * 100);
+
+        this._resizeNext();
+    }
+}
+
+
+export class PreviewLoader extends AbstractLoader {
+    _items = null;
+    _resizedCount = 0;
+    _pointer = null;
+    _pointerScroll = null;
+
+    constructor() {
+        super();
+        $('.content').on('scroll', this._onScroll.bind(this));
+    }
+
+    start(items) {
+        const promise = this._start();
+
+        this._items = items;
+        this._pointer = 0;
+
+        this._onScroll();
+
+        this._resizedCount = 0;
         for (let item of items) {
             if (item.getFile().preview !== null)
-                this.#resizedCount++;
+                this._resizedCount++;
         }
 
-        if (this.#resizedCount !== items.length) {
-            this.#showProgress();
-            this.#setProgress(this.#resizedCount / items.length * 100);
+        if (this._resizedCount !== items.length) {
+            this._showProgress();
+            this._setProgress(this._resizedCount / items.length * 100);
 
-            this.#resizeNext();
+            this._resizeNext();
         } else {
-            this.#showProgress(true);
-            this.#indexNext();
+            this._done();
         }
+
+        return promise;
     }
 
-    onScroll(e) {
-        if (this.#resizedCount === this.#items.length)
+    _onScroll() {
+        if (this._resizedCount === this._items.length)
             return;
 
-        const firstRect = this.#items[0].getElement().getBoundingClientRect();
+        const firstRect = this._items[0]?.getElement()?.getBoundingClientRect();
+        if (!firstRect) { return; }
 
         if (firstRect.top > 0)
             return;
 
         const itemWidth = firstRect.width + 4; // todo margin
         const itemsInRow = Math.floor(window.innerWidth / itemWidth);
-        this.#pointerScroll = Math.floor(-firstRect.top / itemWidth) * itemsInRow;
+        this._pointerScroll = Math.floor(-firstRect.top / itemWidth) * itemsInRow;
     }
 
-    #resizeNext() {
-        if (this.#pointerScroll !== null) {
-            this.#pointer = this.#pointerScroll;
-            this.#pointerScroll = null;
+    _resizeNext() {
+        if (this._pointerScroll !== null) {
+            this._pointer = this._pointerScroll;
+            this._pointerScroll = null;
         }
-        if (this.#resizedCount === this.#items.length) {
-
-            this.#showProgress(true);
-            this.#indexNext();
-
+        if (this._resizedCount === this._items.length) {
+            this._done();
             return;
         }
 
-        while (this.#pointer < this.#items.length && this.#items[this.#pointer].getFile().preview !== null)
-            this.#pointer++;
+        while (this._pointer < this._items.length && this._items[this._pointer].getFile().preview !== null)
+            this._pointer++;
 
-        if (this.#pointer === this.#items.length) {
-            this.#pointer = 0;
-            this.#resizeNext();
+        if (this._pointer === this._items.length) {
+            this._pointer = 0;
+            this._resizeNext();
         }
 
-        const file = this.#items[this.#pointer].getFile();
+        const file = this._items[this._pointer].getFile();
 
         window.api.invoke('filesMakePreview', file.src)
             .then(this.onMakePreview.bind(this, file.src));
     }
 
     onMakePreview(src, preview) {
-        const item = this.#items[this.#pointer];
+        const item = this._items[this._pointer];
         if (item?.getFile().src !== src) return;
 
         item.setPreview(preview);
 
-        this.#resizedCount++;
-        this.#setProgress(this.#resizedCount / this.#items.length * 100);
+        this._resizedCount++;
+        this._setProgress(this._resizedCount / this._items.length * 100);
 
-        this.#resizeNext();
+        this._resizeNext();
     }
+}
 
-    #showProgress(index = false) {
-        this.#progressEl.classList.add('active');
-        if (index)
-            this.#progressEl.classList.add('blue');
-        else
-            this.#progressEl.classList.remove('blue');
-    }
-    #setProgress(percent) {
-        this.#progressBarEl.style.width = percent + '%';
-    }
-    #hideProgress() {
-        this.#progressEl.classList.remove('active');
+/** @deprecated */
+export class DbIndexer extends AbstractLoader {
+    _count = null;
+
+    start(items) {
+        this._count = items.length;
+        this._indexNext();
+
+        return this._start(true);
     }
 
-    #indexNext(status) {
+    _indexNext(status) {
         if (status === 'done') {
-            this.#hideProgress();
+            this._done();
             return;
         }
 
-        this.#setProgress(status / this.#items.length * 100);
+        this._setProgress(status / this._count * 100);
         setTimeout(() => {
             window.api.invoke('filesIndexStep')
-                .then(this.#indexNext.bind(this));
+                .then(this._indexNext.bind(this));
         }, 10);
     }
 }

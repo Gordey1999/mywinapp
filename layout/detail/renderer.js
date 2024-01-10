@@ -159,7 +159,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     }
 
     menu.querySelector('.explorer').addEventListener('click', () => {
-        window.api.send('detailOpenInExplorer', files[index]);
+        window.api.send('openInExplorer', files[index].src);
     });
 })
 window.api.send('detailInit');

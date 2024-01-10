@@ -36,8 +36,17 @@ export function scrollToElement(el, offset = 0) {
     }
 }
 
+export function getScroll() {
+    return contentContainer.scrollTop;
+}
+
+export function setScroll(scroll) {
+    if (!scroll) { return; }
+    contentContainer.scrollTo(0, scroll);
+}
+
 export function scrollToTop() {
-    contentContainer.scroll(0, 0);
+    contentContainer.scrollTo(0, 0);
 }
 
 export function getAbsPosition(el) {

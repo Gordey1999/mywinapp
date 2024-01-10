@@ -7,16 +7,17 @@ export class MovementHistory {
 
     }
 
-    add(src, pointTo = null) {
+    add(src, pointTo = null, scroll = 0) {
         this._pointer++;
         this._history = this._history.slice(0, this._pointer);
 
-        this._history.push({ src, pointTo });
+        this._history.push({ src, pointTo, scroll });
     }
 
-    update(pointTo = null) {
+    update(pointTo = null, scroll = 0) {
         if (this._pointer < 0) { return; }
         this._history[this._pointer].pointTo = pointTo;
+        this._history[this._pointer].scroll = scroll;
     }
 
     prev() {
