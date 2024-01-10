@@ -19,20 +19,25 @@ const contentContainer = document.querySelector('.content');
 
 export function scrollToElement(el, offset = 0) {
     const view = el.getBoundingClientRect();
+    const containerView = contentContainer.getBoundingClientRect();
+
     const scroll = contentContainer.scrollTop;
-    const winHeight = contentContainer.clientHeight;
 
     if (offset === 0) {
         offset = view.height / 2;
     }
-    const top = view.top - offset;
-    const bottom = winHeight - (view.top + view.height + offset);
 
-    if (top < 0) {
-        contentContainer.scrollTo(0, scroll + top);
-    } else if (bottom < 0) {
-        contentContainer.scrollTo(0, scroll - bottom);
+    const topOffset = view.top - containerView.top - offset;
+    const bottomOffset =  view.bottom - containerView.bottom + offset;
+    if (topOffset < 0) {
+        contentContainer.scrollTo(0, scroll + topOffset);
+    } else if (bottomOffset > 0) {
+        contentContainer.scrollTo(0, scroll + bottomOffset);
     }
+}
+
+export function scrollToTop() {
+    contentContainer.scroll(0, 0);
 }
 
 export function getAbsPosition(el) {
@@ -45,33 +50,50 @@ export function getAbsPosition(el) {
     };
 }
 
+/* --- ADAPTIVE GRID --- */
 
-export function adaptiveGrid($container, width, margin, fallback = null) {
-    $(window).on('resize', () => {
-        calculate();
-    });
+export function calculateAdaptiveGrid($container) {
+    const width = $container.data('width');
+    const margin = 2 * $container.data('margin');
 
-    $container.addClass('--adaptive-grid');
 
-    function calculate() {
-        const containerWidth = $container.width();
-        const elMinWidth = width + margin * 2;
+    const containerWidth = $container.width();
+    const elMinWidth = width + margin;
 
-        let count = Math.floor(containerWidth / elMinWidth);
+    let count = Math.floor(containerWidth / elMinWidth);
 
-        if (count < 1) { count = 1; }
+    if (count < 1) { count = 1; }
 
-        const resultWidth = (containerWidth / count) - (margin * 2);
+    const itemWidth = containerWidth / count;
 
-        $container[0].style.setProperty('--grid-item-width', resultWidth + 'px');
+    const el = $container.get(0);
+    el.style.setProperty('--grid-item-width', itemWidth - margin + 'px');
 
-        if (fallback !== null) {
-            fallback(count);
-        }
+    const oldCount = $container.data('count');
+    $container.data('count', count);
+
+    $container.trigger('adaptiveWidthChanged', [ itemWidth, count ]);
+
+    if (parseInt(oldCount) !== count) {
+        $container.trigger('adaptiveGridChanged', [ count ]);
     }
-    calculate();
 }
 
+function calculateAdaptiveGridAll() {
+    $('.--adaptive-grid').each(function () {
+        calculateAdaptiveGrid($(this));
+    });
+}
+
+
+$(window).on('resize', () => {
+    calculateAdaptiveGridAll();
+});
+
+calculateAdaptiveGridAll();
+
+
+/* --- SCROLLBAR --- */
 
 export function createScrollbar(el) {
     new Scrollbar(el);
@@ -112,6 +134,7 @@ class Scrollbar {
 
     #onMouseDown(e) {
         this.#moveBar = true;
+        this.#el.classList.add('--active');
 
         const my = e.clientY;
         const lineHeight = this.#line.offsetHeight;
@@ -142,6 +165,7 @@ class Scrollbar {
     }
     #onMouseUp() {
         this.#moveBar = false;
+        this.#el.classList.remove('--active');
     }
 
     #onScroll() {
@@ -149,12 +173,18 @@ class Scrollbar {
         const scroll = this.#container.scrollTop;
         const viewportHeight = this.#container.clientHeight; // equals document.documentElement.clientHeight
         const docHeight = this.#container.scrollHeight;
+        
+        if (viewportHeight >= docHeight) {
+            $(this.#el).css('opacity', 0);
+        } else {
+            $(this.#el).css('opacity', 1);
+        }
 
         const elHeight = this.#line.offsetHeight;
         let barHeight = viewportHeight / docHeight * elHeight;
         let offset = scroll / docHeight * elHeight;
 
-        const minBarHeight = 50;
+        const minBarHeight = 75;
 
         if (barHeight < minBarHeight) {
             barHeight = minBarHeight;

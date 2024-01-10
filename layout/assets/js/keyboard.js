@@ -224,7 +224,7 @@ export class KeyboardController {
         this.#pointer = p;
 
         this.#blocks[bp].items[p].classList.add('pointer');
-        scrollToElement(this.#blocks[bp].items[p], 150);
+        scrollToElement(this.#blocks[bp].items[p], 100);
         this.#blocks[bp].controller.onSetPointer(p, this.#getPointedElement(), this.#pressed);
     }
     #updateXCourse() {
@@ -285,6 +285,8 @@ export class KeyboardController {
         if (index !== null) {
             this.#blocks.splice(index, 1);
         }
+        this.#pointer = null;
+        this.#blockPointer = null;
     }
 
     pointTo(controller, elOrIndex) {
@@ -300,5 +302,11 @@ export class KeyboardController {
                 this.#updateXCourse();
             }
         }
+    }
+
+    clearPointer() {
+        this.#pointer = null;
+        this.#blockPointer = null;
+        this.#xCourse = 0;
     }
 }

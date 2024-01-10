@@ -1,12 +1,12 @@
-import {adaptiveGrid, createNode} from "../assets/js/tools.js";
+import {createNode} from "../assets/js/tools.js";
 import {FilesIndexer} from "./indexing.js";
 import {setTitle} from "../assets/js/window.js";
 import {makeContextMenu} from "../assets/js/contextMenu.js";
 
 let itemsInRow = 10;
 
-adaptiveGrid($('.files-container'), 140, 2, (count) => {
-    itemsInRow = count;
+$('.files-container').on('adaptiveGridChanged', (e, adaptiveGridChanged) => {
+    itemsInRow = adaptiveGridChanged;
 });
 
 export class FileItem {
@@ -28,6 +28,7 @@ export class FileItem {
 
     #make() {
         this.#el = createNode('div', 'files__item', this.#controller.getContainer());
+        this.createImage();
     }
 
     createImage() {
@@ -273,7 +274,7 @@ export class FilesController {
     }
 
     getItemIndex(id) {
-        return this.#filesPos[id];
+        return this.#filesPos[id] ?? null;
     }
 
     setItemPreview(id, src) {
@@ -303,11 +304,11 @@ export class FilesController {
         this.#pointerItem = this.#items[i];
         if (!this.#selectMode)
             this.#pointerItem.startPreview();
+
+        setTitle(this.#items[i].getFile().name);
     }
 
     #select(i, shift, control) {
-        setTitle(this.#items[i].getFile().name);
-        return;
         const options = this.#selectOptions;
 
         if (i === null || (!shift && !control)) {
@@ -315,6 +316,7 @@ export class FilesController {
             options.startToggled = false;
             return;
         }
+        return;
 
         if (!this.#selectMode) {
             this.#selectMode = true;
@@ -336,7 +338,12 @@ export class FilesController {
 
     setPointer(id) {
         const index = this.getItemIndex(id);
+        if (index === null) { return; }
         window.keyboardController.pointTo(this, index);
+    }
+
+    getPointer() {
+        return this.getSelected()?.getFile().name;
     }
 
     getSelected() {
@@ -348,11 +355,13 @@ export class FilesController {
     }
 
     optimizeItemsRender() {
+        return;
+
         if (!this.#items.length) return;
 
         const viewportHeight = window.innerHeight;
 
-        const chunkSize = 300;
+        const chunkSize = 6000;
 
         // todo вычислять distToNext и скролл первого элемента один раз.
         //  Тогда можно будет получать getBoundingClientRect только при инициализации метода

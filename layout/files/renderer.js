@@ -1,10 +1,12 @@
 "use strict";
 
-import {KeyboardController} from "../assets/js/keyboard.js";
-import {DirTree} from "./dirTree.js";
 import {addMenuOption, setTitle} from "../assets/js/window.js";
+import {scrollToTop} from "../assets/js/tools.js";
+import {KeyboardController} from "../assets/js/keyboard.js";
+import {DirectoriesViewer} from "./directoriesViewer.js";
 import {DirPath} from "./dirPath.js";
 import {FilesController} from "./filesViewer.js";
+import {MovementHistory} from "./history.js";
 
 /*
 cntrl + x - для перетаскивания? cntrl уже занять
@@ -15,61 +17,91 @@ cntrl + x - для перетаскивания? cntrl уже занять
 
  */
 
-
-const container = document.querySelector('.files-container');
-const $sectionsContainer = $('.sections');
-
 window.keyboardController = new KeyboardController();
 
-const dirTreeRoot = new DirTree($sectionsContainer, []);
-let dirTree = dirTreeRoot;
-
 const dirPath = new DirPath($('.dir-path'));
-
-const controller = new FilesController(container);
+const dirViewer = new DirectoriesViewer($('.directories-container'));
+const filesViewer = new FilesController($('.files-container').get(0));
+const movementHistory = new MovementHistory();
 
 window.api.invoke('filesInit').then((result) => {
-    openSection(result.dirPath, result.dirName);
-});
-
-window.api.receive('filesSetSelected', (selectedId) => {
-    controller.setPointer(selectedId);
+    openPath(result.dirPath, result.pointTo);
 });
 
 $(window).on('selectSection', (e, src) => {
-    openSection(src);
+    openPath(src);
 });
 
-function openSection(src) {
+function openPath(src, name = null, fromHistory = false) {
+    if (dirPath.getPath() === src && name) {
+        pointTo(name);
+        return;
+    }
+
+    if (!fromHistory) {
+        const saved = movementHistory.search(src);
+        if (saved?.pointTo) {
+            name = saved.pointTo;
+        }
+        movementHistory.update(getPointer());
+    }
+
     window.api.invoke('filesItemList', src).then((result) => {
         if (result.error) { return }
 
-        const dirName = result.src.split('\\').pop();
-        setTitle(dirName);
-        dirPath.setPath(result.src);
+        scrollToTop();
 
-        fillDirInfo({ path: result.src });
-        dirTree.setChildDirs(result.dirs);
-        controller.setFiles(result.files);
-        fillDirInfo({ count: result.files.length });
+        setTitle(`${result.info.name} (${result.files.length})`);
+        dirPath.setPath(result.info.src);
+
+        dirViewer.setDirectories(result.dirs, result.info);
+        filesViewer.setFiles(result.files);
+        keyboardController.clearPointer();
+
+        if(name) {
+            pointTo(name);
+        } else {
+            pointTo(result.dirs[0]?.name ?? result.files[0]?.name);
+        }
+
+        if (!fromHistory) {
+            movementHistory.add(dirPath.getPath(), name);
+        }
     });
 }
 
-
-function fillDirInfo(info) {
-    const container = document.querySelector('.dir-info');
-    if (typeof info.path !== 'undefined') {
-        const parts = ('root' + info.path).split('\\');
-        document.querySelector('.dir-info__name').textContent = parts.pop();
-    }
-    if (typeof info.count !== 'undefined') {
-        const countEl = container.querySelector('.dir-info__count');
-        countEl.textContent = `(${info.count})`;
-    }
-    if (info.size) {
-
+function pointTo(name) {
+    if (!dirViewer.setPointer(name)) {
+        filesViewer.setPointer(name);
     }
 }
+
+function getPointer() {
+    const dirPointer = dirViewer.getPointer();
+    if (dirPointer !== null) { return dirPointer; }
+
+    return filesViewer.getPointer();
+}
+
+window.api.receive('filesOpenPath', (src, name) => {
+    openPath(src, name);
+});
+
+hotkeys('backspace, q', () => {
+    movementHistory.update(getPointer());
+    const prev = movementHistory.prev();
+    if (prev !== null) {
+        openPath(prev.src, prev.pointTo, true);
+    }
+});
+
+hotkeys('=, e', () => {
+    movementHistory.update(getPointer());
+    const next = movementHistory.next();
+    if (next !== null) {
+        openPath(next.src, next.pointTo, true);
+    }
+});
 
 
 (function() {
@@ -88,8 +120,8 @@ function fillDirInfo(info) {
 (function() {
     let currentDir = null;
 
-    window.addEventListener('selectSection', (e) => {
-        currentDir = e.detail.src;
+    $(window).on('selectSection', (e, src) => {
+        currentDir = src;
     })
 
     addMenuOption('Puzzle', () => {

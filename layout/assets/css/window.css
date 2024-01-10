@@ -43,7 +43,6 @@ body {
     z-index: 1000;
     display: flex;
     flex-wrap: nowrap;
-    box-shadow: 0 0 20px 11px #00000099;
 }
 
 .header > div {
@@ -57,18 +56,23 @@ body {
     cursor: pointer;
     box-sizing: border-box;
     order: 100;
+    stroke: var(--text-color);
 }
 
 .header__icon.--first {
     margin-left: auto;
 }
 
-.header__icon svg {
-    stroke: var(--text-color);
+.header__icon:hover {
+    background: #fff1;
+    stroke: var(--text-color-accent);
+}
+.header__icon:active {
+    background: #fff2;
 }
 
-.header__icon:hover svg {
-    stroke: var(--text-color-accent);
+.header__icon.--close:hover {
+    background: #ff1a1a;
 }
 
 .header__close {
@@ -110,14 +114,16 @@ body {
     padding: 8px;
     cursor: pointer;
     box-sizing: border-box;
-}
-
-.header__menu-small svg {
     stroke: var(--text-color);
 }
 
-.header__menu-small:hover svg {
+.header__menu-small:hover {
     stroke: var(--text-color-accent);
+    background: #fff1;
+}
+.header__menu-small.--active {
+    stroke: var(--text-color-accent);
+    background: #fff2;
 }
 
 .header__title {
@@ -136,7 +142,6 @@ body {
 
 body.--settings .header {
 	background: #333;
-	box-shadow: none;
 }
 body.--settings .header:after {
 	content: "";
@@ -173,4 +178,11 @@ body.--theme-red .header {
 }
 body.--theme-red .background {
 	background: linear-gradient(90deg, #0e1220, #231428)
+}
+
+body.--theme-dark .header {
+    background-image: linear-gradient(237deg, #122b20, #201e39);
+}
+body.--theme-dark .background {
+    background-image: linear-gradient(225deg, #0c1915, #120f1e);
 }

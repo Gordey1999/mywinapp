@@ -31,10 +31,16 @@ class Menu {
         this._$menuBtn.click(this.onMenuClick.bind(this));
     }
 
-    onMenuClick(event) {
+    onMenuClick() {
+        if (this._$menuBtn.hasClass('--active')) {
+            return;
+        }
+        this._$menuBtn.addClass('--active');
         const rect = this._$menuBtn.get(0).getBoundingClientRect();
 
-        makeContextMenu(this._items, rect.left, rect.bottom, 'header');
+        makeContextMenu(this._items, rect.left, rect.bottom, 'header', () => {
+            this._$menuBtn.removeClass('--active');
+        });
     }
 }
 
@@ -152,7 +158,7 @@ export function makeMaximize() {
 }
 
 export function makeClose() {
-    const $button = $('<div>').addClass('header__icon').append(loadIcon('close'));
+    const $button = $('<div>').addClass('header__icon --close').append(loadIcon('close'));
 
     $button.click(() => {
         window.api.send('close');

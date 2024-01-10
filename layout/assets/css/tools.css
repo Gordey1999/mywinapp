@@ -72,11 +72,11 @@ body.--border-rounded {
     height: calc(100% - 20px);
     width: 8px;
     margin: 10px;
-    transition: all 500ms;
+    transition: all 200ms;
 }
-.scrollbar:hover .scrollbar__line {
-    margin: 10px 5px;
-    width: 18px;
+.scrollbar:hover .scrollbar__line, .scrollbar.--active .scrollbar__line {
+    margin: 10px 6px;
+    width: 16px;
 }
 
 .scrollbar__bar {
@@ -86,11 +86,11 @@ body.--border-rounded {
     width: 100%;
     height: 100px;
     border-radius: var(--border-radius-l);
-    box-shadow: 0 0 20px 10px #00000085;
-    opacity: 0;
-    transition: opacity 500ms;
+    box-shadow: 0 0 20px 10px #0000003d;
+     opacity: 0;
+    transition: opacity 200ms;
     cursor: var(--cursor-pointer);
-    background: rgba(128, 178, 158, 0.63);
+    background: #5ba37dbb;
     backdrop-filter: blur(18px);
 }
 
@@ -99,9 +99,9 @@ body.--border-rounded {
 }
 
 .--adaptive-grid {
-    --grid-item-width: 0%;
+    --grid-item-width: 0;
 }
 
-.--adaptive-grid div {
+.--adaptive-grid > div {
     width: var(--grid-item-width);
 }

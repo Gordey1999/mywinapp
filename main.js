@@ -1,23 +1,24 @@
 const { app, ipcMain} = require('electron')
 const path = require('path')
-//const imageinfo = require('imageinfo')
-const util = require('util');
 const settings = require('./lib/settings');
 
 const db = require('./lib/db');
 
+const winDetail = require('./lib/window/detail');
+const winFiles = require('./lib/window/files');
+
 let win;
 
-const winFiles = require('./lib/window/files');
+// todo сделать деталку синглтоном. Если открывается новая, закрывать старую
+// todo если открывается вторая деталка без файлов???
+
+// если окно уже открыто, то после закрытия деталки меняем путь в файлах
+
 app.whenReady().then(() => {
     const file = getSelectedFile(process.argv);
-    if (file) {
-        const dir = path.dirname(file);
-        const name = path.basename(file);
-        const [ files, dirs ] = winFiles.readFiles(dir);
 
-        const detail = require('./lib/window/detail');
-        detail(null, files, name);
+    if (file) {
+        openFile(file);
     } else {
         win = winFiles.open();
     }
@@ -26,21 +27,14 @@ app.whenReady().then(() => {
 if (app.requestSingleInstanceLock()) {
     app.on('second-instance', (event, argv, workingDirectory, additionalData = null) => {
 
-        if (win) {
-            const file = getSelectedFile(argv);
-            if (file) {
-                const dir = path.dirname(file);
-                const name = path.basename(file);
-                const [ files, dirs ] = winFiles.readFiles(dir);
-
-                const detail = require('./lib/window/detail');
-                detail(win, files, name);
-            } else {
-                if (win.isMinimized()) {
-                    win.restore();
-                }
-                win.focus();
+        const file = getSelectedFile(argv);
+        if (file) {
+            openFile(file);
+        } else {
+            if (win.isMinimized()) {
+                win.restore();
             }
+            win.focus();
         }
 
         // const log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'a'});
@@ -50,6 +44,16 @@ if (app.requestSingleInstanceLock()) {
     },);
 } else {
     app.quit();
+}
+
+function openFile(file) {
+    const dir = path.dirname(file);
+    const name = path.basename(file);
+    const [ files ] = winFiles.readFiles(dir);
+
+    winDetail(files, name, win, (pointTo) => {
+        win = winFiles.open(dir, pointTo, win);
+    });
 }
 
 function getSelectedFile(args) {

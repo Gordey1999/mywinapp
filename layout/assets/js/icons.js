@@ -14,7 +14,11 @@ const icons = {
     copy2: [ 16, '<path d="M 3 14 V 6 L 5 4 H 11 V 14 H 3 V 13 M 6 3 7 2 H 13 V 12 H 11" stroke-width="1px"  fill="none"/>' ],
     paste: [ 16, '<path d="M 3 14 v -12 h 10 v 12 h -10 v -1 M 6 2 v 2 h 4 v -2" stroke-width="1px" fill="none" />' ],
     delete: [ 16, '<path d="M 2 3 H 14 M 4 3 L 5 14 H 11 L 12 3 M 7 3 V 2 H 9 V 3" stroke-width="1px" fill="none"/>' ],
+    file: [ 16, '<path d="M 4 13 v -10 h 6 l 2 2 v 8 h -8 v -1 M 6 7 h 4 M 6 10 h 4" stroke-width="1px"  fill="none"/>' ],
+
     x: [ 16, '<path d="M 2 2 L 14 14 M 2 14 L 14 2" stroke-width="1px" fill="none"/>' ],
+
+    arrowFilled: [16, '<path d="M 0 10 L 8 5 L 16 10" />', true ],
 
     checked: [ 16, '<path d="M 2 8 l 4 4 l 8 -8" stroke-width="2px" fill="none"/>' ]
 }

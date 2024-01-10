@@ -4,7 +4,7 @@ html {
 
 body {
     width: 100%;
-    background: black;
+    background: black !important;
     height: 100vh;
     margin: 0;
 
@@ -64,9 +64,9 @@ html ::-webkit-scrollbar {
     width: fit-content;
     margin: 10px auto;
     padding: 10px 0;
-    background: #2b2b2ba8;
+    background: rgba(37, 37, 37, 0.78);
     backdrop-filter: blur(18px);
-    box-shadow: 0 0 20px 10px #00000085;
+    box-shadow: 0 0 20px 10px #00000045;
     border-radius: var(--border-radius-l);
     opacity: 0;
     transition: opacity 500ms;
@@ -76,17 +76,20 @@ html ::-webkit-scrollbar {
 }
 
 .menu__item {
-    color: white;
+    color: var(--text-color);
     margin: 0 15px;
 }
 .menu__item.btn {
     padding: 0 11px 3px;
-    background-color: rgb(255 255 255 / 21%);
+    background-color: rgb(92 92 92 / 43%);
     border-radius: var(--border-radius-s);
     cursor: pointer;
 }
+.menu__item.btn:hover {
+    color: var(--text-color-accent);
+}
 .menu__split {
-    background: #ffffff1c;
+    background: rgb(89 89 89 / 48%);
     width: 2px;
     border-radius: var(--border-radius-s);
     margin: 2px 0;

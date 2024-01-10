@@ -1,6 +1,7 @@
 "use strict";
 
 import {loadIcon} from "../assets/js/icons.js";
+import "../assets/js/window.js";
 
 const $container = $('.settings');
 

@@ -21,6 +21,10 @@ export class DirPath {
         this._make();
     }
 
+    getPath() {
+        return this._path;
+    }
+
     _make() {
         this._$container.html('');
 
@@ -112,6 +116,8 @@ export class DirPath {
     _onElementClick($el) {
         const type = $el.data('type');
         const src = $el.data('src');
+
+        if ($el.hasClass('--active')) { return; }
 
         switch (type) {
             case 'dir':

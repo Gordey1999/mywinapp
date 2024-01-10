@@ -9,7 +9,7 @@ exposeInMainWorld(
         'filesInit', 'filesItemList', 'filesMakePreview', 'filesIndexStep', 'dirPathList'
     ],
     [
-        'filesSetSelected',
+        'filesOpenPath',
         'organizeDirResult'
     ],
     __dirname

@@ -86,16 +86,16 @@ class ContextMenuList {
     }
 
     _make() {
-        const $container = this._makeContainer();
+        const [$container, $inner] = this._makeContainer();
 
         for (const item of this._menu) {
             if (item?.type === 'separator') {
-                this._makeSeparator($container);
+                this._makeSeparator($inner);
             } else if (item?.type === 'group') {
-                this._makeGroup(item, $container);
+                this._makeGroup(item, $inner);
             } else {
                 item.type = 'row';
-                this._makeRow(item, $container);
+                this._makeRow(item, $inner);
             }
         }
         return $container;
@@ -180,8 +180,10 @@ class ContextMenuList {
 
     _makeContainer() {
         const $container = $('<div>').addClass('context-menu');
+        const $inner = $('<div>').addClass('context-menu__inner');
+        $container.append($inner);
         $('body').append($container);
-        return $container;
+        return [ $container, $inner ];
     }
 
     _makeRow(item, $container) {
@@ -235,6 +237,18 @@ class ContextMenuList {
         return $icon;
     }
 
+    _makeScroll() {
+        this._$container.addClass('--scroll');
+
+        const $topArrow = loadIcon('arrowFilled')
+        $($topArrow).addClass('context-menu__arrow-top');
+
+        const $bottomArrow = loadIcon('arrowFilled')
+        $($bottomArrow).addClass('context-menu__arrow-bottom');
+
+        this._$container.append($topArrow, $bottomArrow);
+    }
+
     _calculatePosition(x, y, direction, parentWidth) {
         const winWidth = $(window).width();
         const winHeight = $(window).height();
@@ -247,7 +261,8 @@ class ContextMenuList {
 
         if (height > maxHeight) {
             y = this._offsetTop;
-            const padding = height - this._$container.height();
+            this._makeScroll();
+            const padding = this._$container.outerHeight() - this._$container.height();
             this._$container.height(maxHeight - padding);
         } else if (y + height > winHeight - this._offsetBottom) {
             y = winHeight - height - this._offsetBottom;

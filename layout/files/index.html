@@ -7,7 +7,7 @@
     <title>Explorer</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="--theme-dark">
 
 <div class="header --show-menu">
     <div class="dir-path-container">
@@ -16,6 +16,11 @@
     </div>
     <div class="header__drag_area">
     </div>
+
+<!--    <div class="files__global-index">-->
+<!--        <span class="files__global-index__name">Indexing</span>-->
+<!--        38%-->
+<!--    </div>-->
 </div>
 
 <div class="window">
@@ -28,20 +33,17 @@
             </div>
         </div>
 
-        <div class="sections">
+        <div class="directories-container --adaptive-grid" data-width="225" data-margin="2">
         </div>
-        <div class="dir-info">
-            <span class="dir-info__name">Root</span>
-            <span class="dir-info__count">(52)</span>
-            <span class="dir-info__size">12MB</span>
-        </div>
-        <div class="files-container">
+
+        <div class="files-container --adaptive-grid" data-width="150" data-margin="2">
 
         </div>
     </div>
 </div>
 
 <script src="../assets/js/jquery.js" type="module"></script>
+<script src="../assets/js/hotkeys.min.js" type="module"></script>
 <script src="renderer.js" type="module"></script>
 </body>
 </html>
