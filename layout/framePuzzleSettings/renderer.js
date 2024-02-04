@@ -10,6 +10,7 @@ const $width = $container.find('input[name="width"]');
 const $height = $container.find('input[name="height"]');
 const $spread = $container.find('input[name="spread"]');
 const $showSolution = $container.find('input[name="showSolution"]');
+const $mute = $container.find('input[name="mute"]');
 
 const $save = $container.find('.js-settings-save');
 const $run = $container.find('.js-settings-run');
@@ -23,6 +24,9 @@ window.api.invoke('framePuzzleSettingsInit').then((result) => {
 
 	if (result.settings.showSolution) {
 		$showSolution.click();
+	}
+	if (result.settings.mute) {
+		$mute.click();
 	}
 });
 
@@ -42,7 +46,8 @@ function collectSettings() {
 		width: $width.val(),
 		height: $height.val(),
 		spread: $spread.val() / 100,
-		showSolution: $showSolution.prop('checked')
+		showSolution: $showSolution.prop('checked'),
+		mute: $mute.prop('checked')
 	};
 }
 

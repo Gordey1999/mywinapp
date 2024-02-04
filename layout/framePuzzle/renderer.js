@@ -30,9 +30,12 @@ window.api.invoke('framePuzzleInit').then((result) => {
     })
 });
 
-api.receive('framePuzzleSolved', () => {
+api.receive('framePuzzleSolved', (mute) => {
     $container.find('img').hide();
     const $video = $container.find('.solved-video');
     $video.show();
+    if (mute) {
+        $video.prop('muted', true);
+    }
     $video.get(0).play();
 })
