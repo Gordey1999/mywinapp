@@ -33,6 +33,12 @@ $(window).on('selectSection', (e, src) => {
     openPath(src);
 });
 
+$(window).on('changeSort', (e, newSort) => {
+    window.api.invoke('changeSort', newSort).then(() => {
+        openPath(dirPath.getPath());
+    })
+});
+
 function openPath(src, name = null, scroll = null, fromHistory = false) {
     if (dirPath.getPath() === src && name) {
         pointTo(name);
@@ -53,6 +59,7 @@ function openPath(src, name = null, scroll = null, fromHistory = false) {
 
         dirViewer.setDirectories(result.dirs, result.info);
         filesViewer.setFiles(result.files);
+        filesViewer.setSort(result.info.sort);
         keyboardController.clearPointer();
 
         // noinspection JSIgnoredPromiseFromCall

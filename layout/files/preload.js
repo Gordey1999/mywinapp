@@ -6,7 +6,7 @@ exposeInMainWorld(
         'openFrameMode', 'openFramePuzzle', 'openFramePuzzleSettings', 'openInExplorer', 'openInPaint'
     ],
     [
-        'filesInit', 'filesItemList', 'filesMakePreview', 'filesIndexStep', 'dirPathList'
+        'filesInit', 'filesItemList', 'filesMakePreview', 'filesIndexStep', 'dirPathList', 'changeSort'
     ],
     [
         'filesOpenPath',

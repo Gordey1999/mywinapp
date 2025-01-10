@@ -259,6 +259,10 @@ export class FilesController {
         this.optimizeItemsRender();
     }
 
+    setSort(sort) {
+        this._sort = sort;
+    }
+
     getItems() {
         return this.#items;
     }
@@ -446,16 +450,7 @@ export class FilesController {
             },
             {
                 name: 'Sort...',
-                children: [
-                    { name: 'Name', icon: 'point' },
-                    { name: 'Date Create' },
-                    { name: 'Date Update' },
-                    { name: 'Size' },
-                    { name: 'Type' },
-                    { type: 'separator' },
-                    { name: 'Ascending', icon: 'point' },
-                    { name: 'Descending' },
-                ]
+                children: this._makeSortContext()
             },
             { type: 'separator' },
             {
@@ -499,5 +494,33 @@ export class FilesController {
         ];
 
         makeContextMenu(menu, evt.x, evt.y);
+    }
+
+    _makeSortContext() {
+        const sortList = {
+            nameAsc: 'Name Asc',
+            nameDesc: 'Name Desc',
+            dateAsc: 'Date Asc',
+            dateDesc: 'Date Desc',
+        }
+
+        const result = [];
+
+        for (const [key, name] of Object.entries(sortList) ) {
+            const item = {
+                name: name,
+                callback: () => {
+                    $(window).trigger('changeSort', [key]);
+                }
+            };
+
+            if (this._sort === key) {
+                item.icon = 'point';
+            }
+
+            result.push(item);
+        }
+
+        return result;
     }
 }
