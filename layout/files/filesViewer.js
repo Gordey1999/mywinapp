@@ -68,7 +68,7 @@ export class FileItem {
         this.#timer = setTimeout(() => {
             this.showPreview();
             this.#timer = null;
-        }, 800);
+        }, 500);
     }
 
     clearPreview() {
@@ -138,6 +138,7 @@ export class FilePreview {
 
     #make() {
         this.#el = createNode('div', 'files__item--preview', this.#fileItem.getElement());
+        //this.#el.classList.add('--loading');
 
         if (this.#file.type === 'mp4') {
             const video = createNode('video', 'files__item--preview-img', this.#el);
@@ -161,9 +162,17 @@ export class FilePreview {
     }
 
     #onImageLoad(nw, nh) {
-        const scale = 1.5;
+        const rect = this.#fileItem.getElement().getBoundingClientRect();
+        const scale = 1.2;
+
+        // const x = this.#fileItem.getXIndex();
+        // if (x === 0) {
+        //     this.#el.style.transform = 'translate(0, -50%)';
+        // }
 
         setTimeout(() => {
+            //this.#el.classList.remove('--loading');
+
             if (nw > nh) {
                 const aspect = nw / nh;
                 this.#el.style.width = scale * aspect * 100 + '%';
@@ -173,6 +182,8 @@ export class FilePreview {
                 this.#el.style.width = scale * 100 + '%';
                 this.#el.style.height = scale * aspect * 100 + '%';
             }
+
+            this.#el.style.zIndex = 100;
             const x = this.#fileItem.getXIndex();
 
             if (x === 0) {
@@ -190,6 +201,7 @@ export class FilePreview {
         this.#el.style.removeProperty('height');
         this.#el.style.removeProperty('transform');
         this.#el.style.removeProperty('left');
+        this.#el.style.removeProperty('z-index');
 
         setTimeout(() => {
             this.#el.remove();

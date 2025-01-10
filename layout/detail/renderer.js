@@ -75,6 +75,145 @@ class VideoPlayer {
 }
 
 
+class ItemController {
+    _$container = null
+    _containerW = 0;
+    _containerH = 0;
+    _aspectRatio = 0;
+    _$itemContainer = null;
+    _origW = 0;
+    _origH = 0;
+    _posX = 0;
+    _posY = 0;
+    _scale = 0; // зум относительно оригинального размера файла
+    _minScale = 0.25;
+    _fullScale = 0;
+    _maxScale = 10;
+    _mouseX = 0;
+    _mouseY = 0;
+
+
+    constructor($container, $itemContainer) {
+        this._$container = $container;
+        this._aspectRatio = window.devicePixelRatio;
+        this._$itemContainer = $itemContainer;
+
+        this.onWindowResize();
+        this._bind();
+    }
+
+    _bind() {
+        $(window).on('resize', this.onWindowResize.bind(this));
+        window.addEventListener('wheel', this.onWheel.bind(this));
+        window.addEventListener('mousemove', this.onMouseMove.bind(this));
+        this._$itemContainer.on("dblclick", this._dropZoom.bind(this));
+        // on mouse move
+    }
+
+    onWindowResize() {
+        this._containerW = this._$container.width();
+        this._containerH = this._$container.height();
+        this._render();
+    }
+
+    onMouseMove(e) {
+        this._mouseX = e.x;
+        this._mouseY = e.y;
+    }
+
+    setItem(item, origW, origH, saveScale = false) {
+        this._origW = origW;
+        this._origH = origH;
+
+        if (!saveScale) {
+            this._dropZoom();
+        }
+
+        this._render();
+    }
+
+    _dropZoom() {
+        if (this._containerW / this._origW > this._containerH / this._origH)
+        {
+            this._scale = (this._containerH * this._aspectRatio) / this._origH;
+        }
+        else
+        {
+            this._scale = (this._containerW * this._aspectRatio) / this._origW;
+        }
+        this._fullScale = this._scale;
+        this._render();
+    }
+
+    onWheel(e) {
+        if (e.ctrlKey) {
+            const [w, h] = this._calculateSize();
+            this._scale -= e.deltaY * 0.02;
+
+            const [wn, hn] = this._calculateSize();
+
+            const left = -this._posX;
+            const top = -this._posY;
+
+            const pointX = left + this._mouseX;
+            const pointY = top + this._mouseY;
+            const pointXNew = pointX * (wn / w);
+            const pointYNew = pointY * (hn / h);
+            this._posX = -(pointXNew - this._mouseX);
+            this._posY = -(pointYNew - this._mouseY);
+        }
+        else {
+            this._posX -= e.deltaX * 2;
+            this._posY -= e.deltaY * 2;
+        }
+
+        this._render();
+    }
+
+    _calculateSize() {
+        if (this._scale > this._maxScale) {
+            this._scale = this._maxScale;
+        }
+        else if (this._scale < this._minScale) {
+            this._scale = this._minScale;
+        }
+        if (Math.abs(this._scale - this._fullScale) < 0.04) {
+            this._scale = this._fullScale;
+        }
+
+        const scaleAspect = this._scale / this._aspectRatio;
+        return [scaleAspect * this._origW, scaleAspect * this._origH];
+    }
+
+    _render() {
+        const [w, h] = this._calculateSize();
+
+        this._$itemContainer.width(w);
+        this._$itemContainer.height(h);
+
+        if (this._posX > 0) {
+            this._posX = 0;
+        } else if (this._posX < this._containerW - w) {
+            this._posX = this._containerW - w;
+        }
+        if (this._posY > 0) {
+            this._posY = 0;
+        } else if (this._posY < this._containerH - h) {
+            this._posY = this._containerH - h;
+        }
+
+        if (w <= this._containerW) {
+            this._posX = (this._containerW - w) / 2;
+        }
+        if (h <= this._containerH) {
+            this._posY = (this._containerH - h) / 2;
+        }
+
+        this._$itemContainer.css('left', this._posX + 'px');
+        this._$itemContainer.css('top', this._posY + 'px');
+    }
+}
+
 window.api.receive('detailInitResult', (files, selectedId) => {
 
     let index = null;
@@ -90,6 +229,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     let currentLoaded = false;
 
     const img = document.createElement('img');
+    const itemController = new ItemController($('.container'), $(item));
 
     showFile(files[index]);
 
@@ -100,12 +240,12 @@ window.api.receive('detailInitResult', (files, selectedId) => {
             e.preventDefault();
             if (currentLoaded && index < files.length - 1)
                 index++;
-            showFile(files[index]);
+            showFile(files[index], e.shiftKey);
         } else if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
             e.preventDefault();
             if (currentLoaded && index > 0)
                 index--;
-            showFile(files[index]);
+            showFile(files[index], e.shiftKey);
         } else if (e.code === 'Escape' || e.code === 'Enter') {
             e.preventDefault();
             window.api.send('closeDetail', files[index].id);
@@ -113,7 +253,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     });
 
 
-    function showFile(file) {
+    function showFile(file, saveScale = false) {
         currentLoaded = false;
 
         if (player) {
@@ -136,6 +276,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
                 fillMenuData(video.videoWidth, video.videoHeight);
                 player = new VideoPlayer(video);
                 currentLoaded = true;
+                itemController.setItem(video, video.videoWidth, video.videoHeight, saveScale);
             };
         } else {
             if (video !== null) {
@@ -148,6 +289,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
             img.onload = () => {
                 fillMenuData(img.naturalWidth, img.naturalHeight);
                 currentLoaded = true;
+                itemController.setItem(img, img.naturalWidth, img.naturalHeight, saveScale);
             };
         }
     }
