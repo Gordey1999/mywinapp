@@ -96,3 +96,14 @@
 .context-menu__item.--grow {
     flex-grow: 1;
 }
+
+.context-menu__item.--disabled {
+    background: none !important;
+    color: var(--text-color-disabled) !important;
+}
+.context-menu__item.--disabled svg {
+    stroke: var(--text-color-disabled) !important;
+}
+.context-menu__item.--disabled svg.svg-fill {
+    fill: var(--text-color-accent) !important;
+}

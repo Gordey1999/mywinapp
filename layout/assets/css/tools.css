@@ -17,6 +17,7 @@ body {
     --border-radius-s: 0;
     --cursor-pointer: pointer;
     --text-color: #ffffffaa;
+    --text-color-disabled: #ffffff55;
     --text-color-accent: #fff;
 }
 

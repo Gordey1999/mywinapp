@@ -103,6 +103,8 @@ class ContextMenuList {
     }
 
     _onItemClick(item) {
+        if (item.disabled) { return; }
+
         if (item?.callback) {
             this._controller.destroy();
             item.callback(item);
@@ -192,6 +194,8 @@ class ContextMenuList {
 
     _makeRow(item, $container) {
         const $row = $('<div>').addClass('context-menu__item');
+        if (item.disabled) { $row.addClass('--disabled'); }
+
         const $icon = this._makeIcon(item.icon ?? null);
         const $name = $('<div>').addClass('context-menu__item-name').text(item.name);
         const $icon2 = this._makeIcon(item?.children ? 'arrow' : null);
@@ -214,6 +218,7 @@ class ContextMenuList {
 
         for (const item of group.children) {
             const $item = $('<div>').addClass('context-menu__item');
+            if (item.disabled) { $item.addClass('--disabled'); }
 
             if (item?.icon) {
                 $item.append(this._makeIcon(item.icon))

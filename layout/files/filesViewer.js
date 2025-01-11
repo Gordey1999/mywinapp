@@ -412,6 +412,8 @@ export class FilesController {
         };
         let current = innerList;
 
+        const selectedFile = selected.getFile();
+
         for (let i = 1; i < 40; i++) {
             current.children = [];
             current.children.push(
@@ -432,14 +434,14 @@ export class FilesController {
         let edit = {
             name: 'Edit',
             callback: () => {
-                window.api.send('openInPaint', selected.getFile().src);
+                window.api.send('openInPaint', selectedFile.src);
             }
         }
-        if (selected.getFile().type === 'video') {
+        if (selectedFile.type === 'video') {
             edit = {
                 name: 'Open with VLC',
                 callback: () => {
-                    window.api.send('openInVlc', selected.getFile().src);
+                    window.api.send('openInVlc', selectedFile.src);
                 }
             }
         }
@@ -450,8 +452,8 @@ export class FilesController {
                 name: 'Open in Explorer',
                 icon: 'explorer',
                 callback: () => {
-                    window.api.send('openInExplorer', selected.getFile().src);
-                }
+                    window.api.send('openInExplorer', selectedFile.src);
+                },
             },
             edit,
             innerList,
@@ -466,8 +468,9 @@ export class FilesController {
             {
                 name: 'Frame Mode',
                 callback: () => {
-                    window.api.send('openFrameMode', selected.getFile().src);
-                }
+                    window.api.send('openFrameMode', selectedFile.src);
+                },
+                disabled: selectedFile.type === 'video',
             },
             {
                 type: 'group',
@@ -477,14 +480,16 @@ export class FilesController {
                         icon: 'puzzle',
                         grow: true,
                         callback: () => {
-                            window.api.send('openFramePuzzle', selected.getFile().src);
-                        }
+                            window.api.send('openFramePuzzle', selectedFile.src);
+                        },
+                        disabled: selectedFile.type === 'video',
                     },
                     {
                         icon: 'settings',
                         callback: () => {
-                            window.api.send('openFramePuzzleSettings', selected.getFile().src);
-                        }
+                            window.api.send('openFramePuzzleSettings', selectedFile.src);
+                        },
+                        disabled: selectedFile.type === 'video',
                     }
                 ]
             },
