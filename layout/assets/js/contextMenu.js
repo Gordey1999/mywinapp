@@ -268,18 +268,17 @@ class ContextMenuList {
 
         y = Math.max(y, this._offsetTop);
 
-        const padding = this._$container.outerHeight() - this._$container.height();
-
-        this._$container.height(0);
-        this._$container.css('transition', 'height 500ms cubic-bezier(0.05, 0.36, 0, 0.96) 0s');
+        let padding = this._$container.outerHeight() - this._$container.height();
 
         if (height > maxHeight) {
             y = this._offsetTop;
             this._makeScroll();
+            padding = this._$container.outerHeight() - this._$container.height(); // calculate arrows padding
         } else if (y + height > winHeight - this._offsetBottom) {
             y = winHeight - height - this._offsetBottom;
         }
 
+        this._$container.height(0);
         this._$container.height(Math.min(height, maxHeight) - padding);
 
         if (direction === 'left') {

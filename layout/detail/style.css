@@ -124,7 +124,7 @@ html ::-webkit-scrollbar {
 }
 
 .video-controls .timeline:hover {
-    height: 10px;
+    height: 12px;
 }
 
 .video-controls .timeline__point {
