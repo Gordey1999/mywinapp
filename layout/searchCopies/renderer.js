@@ -111,7 +111,7 @@ import "../assets/js/window.js";
                 const data = copies[dir][name];
 
                 let img;
-                if (data.type === 'mp4') {
+                if (data.type === 'video') {
                     img = createNode('video', 'dir-block__item', filesContainer);
                     img.src = data.src;
                 } else {

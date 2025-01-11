@@ -31,7 +31,7 @@ export class FileItem {
     }
 
     createImage() {
-        if (this.#file.type === 'mp4') {
+        if (this.#file.type === 'video') {
             this.#img = createNode('video', 'files__item-img', this.#el);
             this.#img.src = this.#file.src;
         } else {
@@ -140,7 +140,7 @@ export class FilePreview {
         this.#el = createNode('div', 'files__item--preview', this.#fileItem.getElement());
         //this.#el.classList.add('--loading');
 
-        if (this.#file.type === 'mp4') {
+        if (this.#file.type === 'video') {
             const video = createNode('video', 'files__item--preview-img', this.#el);
             video.src = this.#file.src;
             video.autoplay = true;
@@ -429,6 +429,21 @@ export class FilesController {
             }
         }];
 
+        let edit = {
+            name: 'Edit',
+            callback: () => {
+                window.api.send('openInPaint', selected.getFile().src);
+            }
+        }
+        if (selected.getFile().type === 'video') {
+            edit = {
+                name: 'Open with VLC',
+                callback: () => {
+                    window.api.send('openInVlc', selected.getFile().src);
+                }
+            }
+        }
+
 
         const menu = [
             {
@@ -438,12 +453,7 @@ export class FilesController {
                     window.api.send('openInExplorer', selected.getFile().src);
                 }
             },
-            {
-                name: 'Edit',
-                callback: () => {
-                    window.api.send('openInPaint', selected.getFile().src);
-                }
-            },
+            edit,
             innerList,
             {
                 name: 'Mark...'

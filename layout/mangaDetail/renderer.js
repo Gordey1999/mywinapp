@@ -6,7 +6,7 @@ window.api.receive('mangaDetailInitResult', (files) => {
     const container = document.querySelector('.container');
 
     files.forEach ((file) => {
-        if (file.type === 'mp4') {
+        if (file.type === 'video') {
             return;
         }
 

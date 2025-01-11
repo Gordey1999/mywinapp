@@ -14,11 +14,15 @@ class VideoPlayer {
 
     #timer = null;
 
+    _scrollActive = false;
+    _paused = false;
+
     constructor(video) {
         this.#video = video;
         this.#make();
         this.#bind();
         this.#showControls();
+        this.#updateTime();
     }
     #make() {
         this.#controls.duration.textContent = this.#formatTime(this.#video.duration);
@@ -26,18 +30,54 @@ class VideoPlayer {
 
     #bind() {
         this.#timer = setInterval(this.#updateTime.bind(this), 1000);
-        this.#controls.timeline.addEventListener('click', this.#onTimelineClick.bind(this));
+
+        this.#controls.timeline.addEventListener('mousedown', this._onTimelineClick);
+        document.addEventListener('mousemove', this._onMouseMove);
+        document.addEventListener('mouseup', this._onMouseRelease);
+        document.addEventListener('keydown', this._onKeydown);
     }
     #unbind() {
         clearInterval(this.#timer);
+
+        this.#controls.timeline.removeEventListener('mousedown', this._onTimelineClick);
+        document.removeEventListener('mousemove', this._onMouseMove);
+        document.removeEventListener('mouseup', this._onMouseRelease);
+        document.removeEventListener('keydown', this._onKeydown);
     }
 
-    #onTimelineClick(e) {
+    _onTimelineClick = (e) => {
+        this._scrollActive = true;
+        this.#video.pause();
+
         const duration = this.#video.duration;
-        const timelineWidth = this.#controls.timeline.offsetWidth;
-        const x = e.offsetX;
-        this.#video.currentTime = (x / timelineWidth) * duration;
+        this.#video.currentTime = this._getMouseTimelinePosition(e.clientX) * duration;
         this.#updateTime();
+    }
+
+    _onMouseRelease = (e) => {
+        if (!this._scrollActive) { return; }
+
+        this._scrollActive = false;
+        if (!this._paused) {
+            this.#video.play();
+        }
+    }
+
+    _onMouseMove = (e) => {
+        if (!this._scrollActive) { return; }
+
+        const duration = this.#video.duration;
+        this.#video.currentTime = this._getMouseTimelinePosition(e.clientX) * duration;
+        this.#updateTime();
+    }
+
+    _getMouseTimelinePosition(mouseX) {
+        const timelineRect = this.#controls.timeline.getBoundingClientRect();
+
+        if (mouseX < timelineRect.left) { return 0; }
+        if (mouseX > timelineRect.right) { return 1; }
+
+        return (mouseX - timelineRect.left) / timelineRect.width;
     }
 
     #updateTime() {
@@ -71,6 +111,32 @@ class VideoPlayer {
     destroy() {
         this.#hideControls();
         this.#unbind();
+    }
+
+    _onKeydown = (e) => {
+        if (this._scrollActive) { return; }
+
+        if (e.shiftKey) {
+            if (e.code === 'KeyD' || e.code === 'ArrowRight') {
+                e.preventDefault();
+                this.#video.currentTime += 5;
+                this.#updateTime();
+            } else if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+                e.preventDefault();
+                this.#video.currentTime -= 5;
+                this.#updateTime();
+            }
+        }
+        if (e.code === 'Space') {
+            e.preventDefault();
+
+            if (this._paused) {
+                this.#video.play();
+            } else {
+                this.#video.pause();
+            }
+            this._paused = !this._paused;
+        }
     }
 }
 
@@ -236,6 +302,12 @@ window.api.receive('detailInitResult', (files, selectedId) => {
     item.append(img);
 
     document.addEventListener('keydown', (e) => {
+        if (files[index].type === 'video' && e.shiftKey) { return; }
+
+        if (files[index].type === 'video') {
+            files[index].currentTime = video.currentTime;
+        }
+
         if (e.code === 'KeyD' || e.code === 'ArrowRight') {
             e.preventDefault();
             if (currentLoaded && index < files.length - 1)
@@ -261,7 +333,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
             player = null;
         }
 
-        if (file.type === 'mp4') {
+        if (file.type === 'video') {
             if (video !== null) {
                 video.remove();
             }
@@ -269,6 +341,7 @@ window.api.receive('detailInitResult', (files, selectedId) => {
             video.src = file.src;
             video.autoplay = true;
             video.loop = true;
+            video.currentTime = file.currentTime ?? 0;
 
             img.style.display = 'none';
 

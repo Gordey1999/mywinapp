@@ -1,8 +1,10 @@
 const { app, ipcMain, shell} = require('electron')
 const path = require('path')
+const { exec } = require("child_process")
 const settings = require('./lib/settings');
 
 const db = require('./lib/db');
+const {getFileExt} = require("./lib/tools");
 
 const winDetail = require('./lib/window/detail');
 const winFiles = require('./lib/window/files');
@@ -58,10 +60,8 @@ function openFile(file) {
 
 function getSelectedFile(args) {
     for (const arg of args) {
-        for (const type of settings.types) {
-            if (arg.endsWith(`.${type}`)) {
-                return arg;
-            }
+        if (getFileExt(arg)) {
+            return arg;
         }
     }
     return null;
@@ -106,11 +106,13 @@ ipcMain.on('openInExplorer', (event, src) => {
 
 ipcMain.on('openInPaint', (event, src) => {
     if (src.includes('"') || src.includes("'")) { return; }
-    const { exec } = require("child_process");
     exec(`"${settings.editApp}" "${src}"`);
 })
 
-
+ipcMain.on('openInVlc', (event, src) => {
+    if (src.includes('"') || src.includes("'")) { return; }
+    exec(`"${settings.vlcApp}" "${src}"`);
+})
 
 
 const fs = require('fs');
