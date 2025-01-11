@@ -35,17 +35,17 @@ $(window).on('selectSection', (e, src) => {
 
 $(window).on('changeSort', (e, newSort) => {
     window.api.invoke('changeSort', newSort).then(() => {
-        openPath(dirPath.getPath());
+        openPath(dirPath.getPath(), getPointer(), null, false, true);
     })
 });
 
-function openPath(src, name = null, scroll = null, fromHistory = false) {
-    if (dirPath.getPath() === src && name) {
+function openPath(src, name = null, scroll = null, saveToHistory = true, reloadRequired = false) {
+    if (dirPath.getPath() === src && name && !reloadRequired) {
         pointTo(name);
         return;
     }
 
-    if (!fromHistory) {
+    if (saveToHistory) {
         movementHistory.update(getPointer(), getScroll());
     }
 
@@ -72,7 +72,7 @@ function openPath(src, name = null, scroll = null, fromHistory = false) {
             pointTo(result.dirs[0]?.name ?? result.files[0]?.name);
         }
 
-        if (!fromHistory) {
+        if (saveToHistory) {
             movementHistory.add(dirPath.getPath(), name, getScroll());
         }
     });
@@ -112,7 +112,7 @@ hotkeys('backspace, q', () => {
     movementHistory.update(getPointer(), getScroll());
     const prev = movementHistory.prev();
     if (prev !== null) {
-        openPath(prev.src, prev.pointTo, prev.scroll, true);
+        openPath(prev.src, prev.pointTo, prev.scroll, false);
     }
 });
 
@@ -120,7 +120,7 @@ hotkeys('=, e', () => {
     movementHistory.update(getPointer(), getScroll());
     const next = movementHistory.next();
     if (next !== null) {
-        openPath(next.src, next.pointTo, next.scroll, true);
+        openPath(next.src, next.pointTo, next.scroll, false);
     }
 });
 
