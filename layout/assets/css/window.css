@@ -180,9 +180,14 @@ body.--theme-red .background {
 	background: linear-gradient(90deg, #0e1220, #231428)
 }
 
-body.--theme-dark .header {
-    background-image: linear-gradient(237deg, #122b20, #201e39);
+body.--theme-darkest .header {
+    background: linear-gradient(90deg, var(--color-accent) -100%, rgba(15,14,36,1) 100%);
 }
-body.--theme-dark .background {
-    background-image: linear-gradient(225deg, #0c1915, #120f1e);
+body.--theme-darkest .background {
+    background: rgb(8, 8, 16);
+}
+
+body.--theme-darkest {
+    --color-accent: rgba(35, 112, 97, 0.78);
+    --color-context: rgba(23, 23, 23, 0.84);
 }

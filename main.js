@@ -3,18 +3,18 @@ const path = require('path')
 const { exec } = require("child_process")
 const settings = require('./lib/settings');
 
-const db = require('./lib/db');
+//const db = require('./lib/db');
 const {getFileExt} = require("./lib/tools");
 
 const winDetail = require('./lib/window/detail');
 const winFiles = require('./lib/window/files');
 
-let win;
 
 // todo сделать деталку синглтоном. Если открывается новая, закрывать старую
 // todo если открывается вторая деталка без файлов???
 
 // если окно уже открыто, то после закрытия деталки меняем путь в файлах
+// todo package to build exe
 
 app.whenReady().then(() => {
     const file = getSelectedFile(process.argv);
@@ -22,7 +22,7 @@ app.whenReady().then(() => {
     if (file) {
         openFile(file);
     } else {
-        win = winFiles.open();
+        winFiles.open();
     }
 });
 
@@ -33,10 +33,7 @@ if (app.requestSingleInstanceLock()) {
         if (file) {
             openFile(file);
         } else {
-            if (win.isMinimized()) {
-                win.restore();
-            }
-            win.focus();
+            winFiles.open();
         }
 
         // const log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'a'});
@@ -54,7 +51,7 @@ function openFile(file) {
     const [ files ] = winFiles.readFiles(dir);
 
     winDetail(files, name, win, (pointTo) => {
-        win = winFiles.open(dir, pointTo, win);
+        winFiles.open(dir, pointTo, win);
     });
 }
 
@@ -70,7 +67,7 @@ function getSelectedFile(args) {
 
 
 app.on('window-all-closed', () => {
-    db.close();
+    //db.close();
     if (process.platform !== 'darwin') app.quit();
 })
 
@@ -82,23 +79,30 @@ ipcMain.on("openIndexFiles", (event, dirPath) => {
 
 
 ipcMain.on('openPuzzle', (event) => {
+    return;
     const puzzle = require('./lib/window/puzzle');
 	puzzle(win);
 })
 ipcMain.on('openSearchCopies', (event) => {
+    return;
     const searchCopies = require('./lib/window/searchCopies');
     searchCopies(win);
 })
 
 ipcMain.on('openMangaMode', (event, currentDir) => {
     const mangaMode = require('./lib/window/mangaMode');
-    mangaMode(win, currentDir);
+    mangaMode(currentDir);
 })
 
 ipcMain.on('openFrameMode', (event, src) => {
     const frameMode = require('./lib/window/frameMode');
     frameMode(src);
 })
+
+ipcMain.on('openNewWindow', (event, src) => {
+    const mangaMode = require('./lib/window/mangaMode');
+    winFiles.open(src);
+});
 
 ipcMain.on('openInExplorer', (event, src) => {
     shell.showItemInFolder(src);

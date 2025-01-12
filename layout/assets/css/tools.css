@@ -19,6 +19,8 @@ body {
     --text-color: #ffffffaa;
     --text-color-disabled: #ffffff55;
     --text-color-accent: #fff;
+    --color-accent: #4dff7745;
+    --color-context: #242424d6;
 }
 
 body.--hide-cursor {
@@ -91,7 +93,7 @@ body.--border-rounded {
      opacity: 0;
     transition: opacity 200ms;
     cursor: var(--cursor-pointer);
-    background: #5ba37dbb;
+    background: var(--color-accent);
     backdrop-filter: blur(18px);
 }
 

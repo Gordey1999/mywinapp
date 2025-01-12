@@ -56,6 +56,7 @@ function initWindow() {
 		makeBarSettings();
 	} else {
 		makeBar();
+        chooseTheme();
 		createScrollbar($content[0]);
 	}
 }
@@ -85,6 +86,13 @@ function makeBar() {
     const $maximize = makeMaximize();
 
     $header.append($title, $minimize, $maximize, $close);
+}
+
+function chooseTheme() {
+    const h = parseInt((Math.random() * 360));
+    const hsl = `hsl(${h}deg 52% 29% / 78%)`;
+
+    $('body').css("--color-accent", hsl);
 }
 
 function makeBarSettings() {

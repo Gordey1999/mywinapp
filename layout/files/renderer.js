@@ -154,4 +154,7 @@ hotkeys('=, e', () => {
     addMenuOption('Manga Mode', () => {
         window.api.send('openMangaMode', currentDir);
     });
+    addMenuOption('New Window', () => {
+        window.api.send('openNewWindow', currentDir);
+    });
 })();
