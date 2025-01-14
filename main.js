@@ -51,8 +51,8 @@ function openFile(file) {
     const name = path.basename(file);
     const [ files ] = winFiles.readFiles(dir);
 
-    winDetail(files, name, win, (pointTo) => {
-        winFiles.open(dir, pointTo, win);
+    winDetail(files, name, null, (pointTo) => {
+        winFiles.open(dir, pointTo, null);
     });
 }
 

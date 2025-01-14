@@ -60,16 +60,16 @@ export class DirectoryLoader extends AbstractLoader {
     start(dirs, dirViewer) {
         const promise = this._start();
 
-        this._dirs = dirs.filter(dir => dir.preview).reverse();
+        this._dirs = dirs.reverse();
         this._dirsCount = dirs.length;
         this._dirViewer = dirViewer;
 
-        this._resizeNext();
+        this._processNext();
 
         return promise;
     }
 
-    _resizeNext() {
+    _processNext() {
         if (this._dirs.length === 0) {
             this._done();
             return;
@@ -77,16 +77,16 @@ export class DirectoryLoader extends AbstractLoader {
 
         const dir = this._dirs.pop();
 
-        window.api.invoke('filesMakePreview', dir.preview)
-            .then(this.onMakePreview.bind(this, dir.name));
+        window.api.invoke('filesDirectoryInfo', dir.src)
+            .then(this.onInfoLoaded.bind(this, dir.name));
     }
 
-    onMakePreview(name, preview) {
-        this._dirViewer.setPreview(name, preview);
+    onInfoLoaded(name, info) {
+        this._dirViewer.setInfo(name, info);
 
         this._setProgress((this._dirsCount - this._dirs.length) / this._dirsCount * 100);
 
-        this._resizeNext();
+        this._processNext();
     }
 }
 
@@ -166,7 +166,7 @@ export class PreviewLoader extends AbstractLoader {
 
         const file = this._items[this._pointer].getFile();
 
-        window.api.invoke('filesMakePreview', file.src)
+        window.api.invoke('filesMakePreview', { src: file.src, mtime: file.mtime })
             .then(this.onMakePreview.bind(this, file.src));
     }
 

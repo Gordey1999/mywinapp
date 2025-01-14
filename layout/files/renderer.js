@@ -21,6 +21,10 @@ window.api.invoke('filesInit').then((result) => {
     openPath(result.dirPath, result.pointTo);
 });
 
+window.api.receive('filesOnFocus', () => {
+    openPath(dirPath.getPath());
+});
+
 $(window).on('selectSection', (e, src) => {
     if (dirPath.getPath() !== src) {
         movementHistory.update(getPointer(), getScroll());
@@ -34,14 +38,6 @@ $(window).on('changeSort', (e, newSort) => {
         openPath(dirPath.getPath(), getPointer(), null);
     })
 });
-
-function redraw() {
-    const src = dirPath.getPath();
-    const selected = getPointer();
-    const scroll = getScroll();
-
-    openPath(src, selected, scroll);
-}
 
 async function openPath(src, name = null, scroll = null) {
     const samePath = dirPath.getPath() === src;

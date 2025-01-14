@@ -6,9 +6,11 @@ exposeInMainWorld(
         'openFrameMode', 'openFramePuzzle', 'openFramePuzzleSettings', 'openInExplorer', 'openInPaint', 'openInVlc', 'onDragStart',
     ],
     [
-        'filesInit', 'filesItemList', 'filesMakePreview', 'filesIndexStep', 'dirPathList', 'changeSort', 'filesCheckUpdated',
+        'filesInit', 'filesItemList', 'filesMakePreview', 'filesDirectoryInfo',
+        'filesIndexStep', 'dirPathList', 'changeSort', 'filesCheckUpdated',
     ],
     [
+        'filesOnFocus',
         'filesOpenPath',
         'organizeDirResult'
     ],

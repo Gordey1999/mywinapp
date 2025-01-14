@@ -33,11 +33,22 @@ export class DirectoriesViewer {
         return true;
     }
 
-    setPreview(name, src) {
-        const $img = this._getByName(name).find('img');
-        if ($img.length === 0) { return false; }
+    setInfo(name, info) {
+        const $block = this._getByName(name);
+        if ($block.length === 0) { return false; }
 
-        $img.attr('src', src);
+        const $other = $block.find('.directories__item-other');
+
+        if (info.preview) {
+            $block.prepend(this._makeImage(info.preview));
+        }
+
+        if (info.dirsCount > 0) {
+            $other.append(this._makeOtherItem('explorer', info.dirsCount));
+        }
+        if (info.filesCount > 0) {
+            $other.append(this._makeOtherItem('file', info.filesCount));
+        }
     }
 
     _getByName(name) {
@@ -56,11 +67,6 @@ export class DirectoriesViewer {
 
         for (const dir of this._dirList) {
             const $block = $('<div>').addClass('directories__item').css('order', 10);
-
-
-            if (dir.preview) {
-                $block.append(this._makeImages(dir));
-            }
 
             $block.append(this._makeInfo(dir));
 
@@ -106,13 +112,6 @@ export class DirectoriesViewer {
         const $name = $('<div>').addClass('directories__item-name').text(dir.name);
         const $other = $('<div>').addClass('directories__item-other');
 
-        if (dir.dirsCount > 0) {
-            $other.append(this._makeOtherItem('explorer', dir.dirsCount));
-        }
-        if (dir.filesCount > 0) {
-            $other.append(this._makeOtherItem('file', dir.filesCount));
-        }
-
         $info.append($name, $other);
 
         return $info;
@@ -127,10 +126,10 @@ export class DirectoriesViewer {
         return $el;
     }
 
-    _makeImages() {
+    _makeImage(src) {
         const $imagesBlock = $('<div>').addClass('directories__item-images');
 
-        const $image = $('<img>').attr('src', '../assets/img/image_back.png');
+        const $image = $('<img>').attr('src', src);
         $imagesBlock.append($image);
 
         return $imagesBlock;
