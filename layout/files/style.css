@@ -2,6 +2,26 @@ body {
     background: black;
 }
 
+.loading {
+    z-index: 100;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgb(8, 8, 16);
+    transition: opacity cubic-bezier(0.92, 0.02, 0.92, 0.64) 500ms;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+.loading span {
+    color: var(--text-color);
+    font-size: 30px;
+    margin-left: 12px;
+}
+
 .files-container {
     width: 100%;
     display: flex;
@@ -19,27 +39,8 @@ body {
     border-radius: var(--border-radius-m);
     box-sizing: border-box;
 }
-.files-container.selectMode .files__item {
-    /*background: #468ad87d;*/
-}
-.files-container.selectMode .files__item.selected {
-    /*border: 2px solid #468ad87d;*/
-}
-.files-container.selectMode .files__item-img {
-    width: 70%;
-    height: 70%;
-    margin: 15%;
-    opacity: 0.8;
-}
-.files-container.selectMode .files__item.selected .files__item-img {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    opacity: 1;
-}
-.files__item.pointer {
+.files__item.--pointer {
     outline: 2px solid #ffffff;
-    /*opacity: 1;*/
 }
 .files__item:focus {
     outline: none;
@@ -52,38 +53,6 @@ body {
     border-radius: var(--border-radius-m);
     transition: all 0.5s;
 }
-
-.files__item--preview {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    transform: translate(-50%, -50%);
-    top: 50%;
-    box-shadow: 0 0 20px 10px #00000085;
-    border-radius: var(--border-radius-m);
-    transition: width 500ms cubic-bezier(0, 0, 0.2, 1), height 500ms cubic-bezier(0, 0, 0.2, 1),
-        left 500ms cubic-bezier(0, 0, 0.2, 1),
-        z-index 500ms cubic-bezier(0, 0, 0.2, 1);
-}
-.files__item--preview.--middle {
-    left: 50%;
-    transition: none;
-    transform: translateX(-50%);
-}
-
-.files__item--preview-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--border-radius-m);
-}
-.files__item.pointer .files__item--preview {
-    border: 2px solid #ffffff;
-    border-radius: var(--border-radius-m);
-    box-sizing: border-box;
-}
-
 
 
 
@@ -110,7 +79,7 @@ body {
     flex-wrap: nowrap;
 }
 
-.directories__item.pointer {
+.directories__item.--pointer {
     border-color: white;
     color: var(--text-color-accent);
     stroke: var(--text-color-accent);

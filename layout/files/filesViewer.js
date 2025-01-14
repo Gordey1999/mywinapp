@@ -14,19 +14,16 @@ export class FileItem {
     #el = null;
     #img = null;
 
-    #preview = null;
-    #timer = null;
-
-    #selected = false;
-
-    constructor(controller, file) {
+    constructor(controller, container, file) {
         this.#controller = controller;
         this.#file = file;
-        this.#make();
+        this.#make(container);
     }
 
-    #make() {
-        this.#el = createNode('div', 'files__item', this.#controller.getContainer());
+    destroy() {}
+
+    #make(container) {
+        this.#el = container;
         this.createImage();
     }
 
@@ -46,69 +43,6 @@ export class FileItem {
             this.#img.loading = 'lazy';
         }
     }
-    removeImage() {
-        this.#img.remove();
-        this.#img = null;
-    }
-    imageCreated() {
-        return this.#img !== null;
-    }
-
-
-    showPreview() {
-        return // todo preview
-        if (this.#preview) { return; }
-        this.#preview = new FilePreview(this);
-    }
-
-    startPreview() {
-        if (this.#preview) { return; }
-
-        this.clearPreview();
-        this.#timer = setTimeout(() => {
-            this.showPreview();
-            this.#timer = null;
-        }, 500);
-    }
-
-    clearPreview() {
-        if (this.#preview) {
-            this.#preview.destroy();
-            this.#preview = null;
-        }
-        if (this.#timer) {
-            clearTimeout(this.#timer);
-            this.#timer = null;
-        }
-    }
-    togglePreview() {
-        this.#preview ? this.clearPreview() : this.showPreview();
-    }
-
-    setSelected(b) {
-        if (this.#selected === b) { return; }
-
-        this.#selected = b;
-
-        if (b) {
-            this.#el.classList.add('selected');
-        } else {
-            this.#el.classList.remove('selected');
-        }
-    }
-    toggleSelected() {
-        this.setSelected(!this.#selected);
-    }
-    getSelected() {
-        return this.#selected;
-    }
-
-    getXIndex() {
-        return this.#controller.getItemIndex(this.#file.id) % itemsInRow;
-    }
-    getYIndex() {
-        return this.#controller.getItemIndex(this.#file.id) / itemsInRow;
-    }
 
     setPreview(path) {
         this.#file.preview = path;
@@ -123,289 +57,147 @@ export class FileItem {
     }
 }
 
-
-export class FilePreview {
-    #fileItem = null;
-    #file = null;
-    #el = null;
-
-    constructor(fileItem) {
-        this.#fileItem = fileItem;
-        this.#file = fileItem.getFile();
-
-        this.#make();
-    }
-
-    #make() {
-        this.#el = createNode('div', 'files__item--preview', this.#fileItem.getElement());
-        //this.#el.classList.add('--loading');
-
-        if (this.#file.type === 'video') {
-            const video = createNode('video', 'files__item--preview-img', this.#el);
-            video.src = this.#file.src;
-            video.autoplay = true;
-            video.loop = true;
-            video.muted = true;
-
-            video.onloadeddata = () => {
-                this.#onImageLoad(video.videoWidth, video.videoHeight)
-            };
-
-        } else {
-            const img = createNode('img', 'files__item--preview-img', this.#el);
-            img.src = this.#file.src;
-
-            img.onload = () => {
-                this.#onImageLoad(img.naturalWidth, img.naturalHeight);
-            };
-        }
-    }
-
-    #onImageLoad(nw, nh) {
-        const rect = this.#fileItem.getElement().getBoundingClientRect();
-        const scale = 1.2;
-
-        // const x = this.#fileItem.getXIndex();
-        // if (x === 0) {
-        //     this.#el.style.transform = 'translate(0, -50%)';
-        // }
-
-        setTimeout(() => {
-            //this.#el.classList.remove('--loading');
-
-            if (nw > nh) {
-                const aspect = nw / nh;
-                this.#el.style.width = scale * aspect * 100 + '%';
-                this.#el.style.height = scale * 100 + '%';
-            } else {
-                const aspect = nh / nw;
-                this.#el.style.width = scale * 100 + '%';
-                this.#el.style.height = scale * aspect * 100 + '%';
-            }
-
-            this.#el.style.zIndex = 100;
-            const x = this.#fileItem.getXIndex();
-
-            if (x === 0) {
-                this.#el.style.transform = 'translate(0, -50%)';
-                this.#el.style.left = 0;
-            } else if (x === itemsInRow - 1) {
-                this.#el.style.transform = 'translate(-100%, -50%)';
-                this.#el.style.left = '100%';
-            }
-        }, 10);
-    }
-
-    destroy() {
-        this.#el.style.removeProperty('width');
-        this.#el.style.removeProperty('height');
-        this.#el.style.removeProperty('transform');
-        this.#el.style.removeProperty('left');
-        this.#el.style.removeProperty('z-index');
-
-        setTimeout(() => {
-            this.#el.remove();
-        }, 500);
-    }
-}
-
 export class FilesController {
 
     #el = null;
     #items = null;
-    #filesPos = null;
-    #pointerItem = null;
-
-    #selectMode = false;
-    #selectOptions = {
-        start: null,
-        startToggled: false,
-        controlDownI: null,
-        controlUpI: null,
-    };
-
-    //#lastScroll = 0;
 
     constructor(container) {
         this.#el = container;
 
         this.#items = [];
-
-        document.querySelector('.content').addEventListener('scroll', this.optimizeItemsRender.bind(this));
     }
 
     setFiles(files) {
-        this.#el.innerHTML = '';
-        this.#selectMode = false;
-
-        this.#items = [];
-
-        let index = 0;
-
-        this.#filesPos = {};
-        files.forEach(file => {
-            file.index = index;
-            this.#items.push(new FileItem(this, file));
-            this.#filesPos[file.id] = index;
-            index++;
-        })
-
-        if (files.length) {
-            window.keyboardController.addBlock(this, this.#el.querySelectorAll('.files__item'))
-        } else {
-            window.keyboardController.removeBlock(this);
+        for (const item of this.#items) {
+            item.destroy();
         }
 
-        this.optimizeItemsRender();
+        this.#el.innerHTML = '';
+        this.#items = [];
+
+        files.forEach(file => {
+            const container = $('<div class="files__item"/>');
+            $(this.getContainer()).append(container);
+            this.#items.push(new FileItem(this, container[0], file));
+        })
+
+        window.keyboardController.addBlock(this);
+    }
+
+    updateFiles(files) {
+        const ids = files.map(file => file.id);
+
+        // remove deleted files
+
+        this.#items = this.#items.filter(item => {
+            if (ids.includes(item.getFile().id)) {
+                return true;
+            }
+            item.destroy();
+            item.getElement().remove();
+            return false;
+        })
+
+        // add new and check other
+
+        let index = 0;
+        let item = this.#items[index];
+        const updatedItems = [];
+
+        for (const file of files) {
+            const oldFile = item?.getFile();
+
+            if (file.id === oldFile?.id) {
+                if (oldFile.mtime !== file.mtime) {
+                    oldFile.preview = null;
+                }
+                updatedItems.push(item);
+                index++;
+                item = this.#items[index];
+            } else {
+                const container = $('<div class="files__item"/>');
+                if (item) {
+                    container.insertBefore(item.getElement());
+                } else {
+                    $(this.getContainer()).append(container);
+                }
+                updatedItems.push(new FileItem(this, container[0], file));
+            }
+        }
+
+        this.#items = updatedItems;
+
+        window.keyboardController.addBlock(this);
     }
 
     setSort(sort) {
         this._sort = sort;
     }
 
+    getSort() {
+        return this._sort;
+    }
+
     getItems() {
         return this.#items;
+    }
+
+    getElementsSelector() {
+        return '.files__item';
     }
 
     onKeyboardEvent(event, i, el, evt) {
         if (event === 'enter') {
             this.openDetail(this.#items[i].getFile().id);
-        } else if (event === 'click' || event === 'shift') {
-            if (!this.#selectMode)
-                this.#pointerItem.togglePreview();
-            //if (this.#selectOptions.controlDownI)
         } else if (event === 'dbClick') {
             this.openDetail(this.#items[i].getFile().id);
-        } else if (event === 'control') {
-            this.#selectOptions.controlDownI = i;
-            this.#selectOptions.controlUpI = null;
-        } else if (event === 'controlUp') {
-            this.#selectOptions.controlUpI = i;
-            this.#select(i, false, true);
         } else if (event === 'rightClick') {
             this.#makeContextMenu(evt);
         }
     }
 
-    getItemIndex(id) {
-        return this.#filesPos[id] ?? null;
-    }
-
-    setItemPreview(id, src) {
-        for (const item of this.#items) {
-            if (item.getFile().id === id) {
-                item.setPreview(src);
-            }
-        }
-    }
-
     openDetail(id) {
-        this.#pointerItem.clearPreview();
         window.api.send('openDetail', id);
     }
 
-    onSetPointer(i, el, pressed) {
-        this.#select(i, pressed.shift, pressed.control);
-
-        if (this.#pointerItem) {
-            this.#pointerItem.clearPreview();
-        }
-
-        if (i === null) {
-            this.#pointerItem = null;
-            return;
-        }
-        this.#pointerItem = this.#items[i];
-        if (!this.#selectMode)
-            this.#pointerItem.startPreview();
-
+    onSetPointer(i, el) {
         setTitle(this.#items[i].getFile().name);
     }
 
-    #select(i, shift, control) {
-        const options = this.#selectOptions;
+    setPointer(id) {
+        let item = this._getById(id);
+        if (item === null) { return; }
 
-        if (i === null || (!shift && !control)) {
-            options.start = i;
-            options.startToggled = false;
-            return;
-        }
-        return;
-
-        if (!this.#selectMode) {
-            this.#selectMode = true;
-            this.#el.classList.add('selectMode');
-        }
-
-        if (shift) {
-
-        } else if (control) {
-            if (options.controlUpI !== null) {
-                if (options.controlDownI === options.controlUpI)
-                    this.#items[i].toggleSelected();
-                options.controlUpI = null;
-            } else {
-                this.#items[i].toggleSelected();
-            }
-        }
+        window.keyboardController.pointTo(item.getElement());
     }
 
-    setPointer(id) {
-        const index = this.getItemIndex(id);
-        if (index === null) { return; }
-        window.keyboardController.pointTo(this, index);
+    _getById(id) {
+        for (const item of this.#items) {
+            if (item.getFile().id === id) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    _getSelected() {
+        const i = window.keyboardController.getPointerIndex(this);
+        if (i === null) { return null; }
+
+        return this.#items[i];
     }
 
     getPointer() {
-        return this.getSelected()?.getFile().name;
-    }
-
-    getSelected() {
-        return this.#pointerItem;
+        return this._getSelected()?.getFile()?.id ?? null;
     }
 
     getContainer() {
         return this.#el;
     }
 
-    optimizeItemsRender() {
-        return;
-
-        if (!this.#items.length) return;
-
-        const viewportHeight = window.innerHeight;
-
-        const chunkSize = 6000;
-
-        // todo вычислять distToNext и скролл первого элемента один раз.
-        //  Тогда можно будет получать getBoundingClientRect только при инициализации метода
-
-        let view = this.#items[0].getElement().getBoundingClientRect();
-
-        for (let i = 0; i < this.#items.length; i += chunkSize) {
-
-            const nextChunkI = Math.min(this.#items.length - 1, i + chunkSize);
-            const viewNext = this.#items[nextChunkI].getElement().getBoundingClientRect();
-            const distToNext = viewNext.top - view.top;
-
-            const maxJ = Math.min(this.#items.length, i + chunkSize);
-            if (view.top > -distToNext && view.bottom < viewportHeight + distToNext) {
-                if (!this.#items[i].imageCreated()) {
-                    for (let j = i; j < maxJ; j++)
-                        this.#items[j].createImage();
-                }
-            } else {
-                if (this.#items[i].imageCreated()) {
-                    for (let j = i; j < maxJ; j++)
-                        this.#items[j].removeImage();
-                }
-            }
-            view = viewNext;
-        }
-    }
-
     #makeContextMenu(evt) {
-        const selected = this.getSelected();
+        const selected = this._getSelected();
 
         const innerList = {
             name: 'Woooow',

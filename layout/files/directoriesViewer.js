@@ -21,11 +21,15 @@ export class DirectoriesViewer {
         calculateAdaptiveGrid(this._$el);
     }
 
+    getActualTime() {
+        return this._currentDir.mtime;
+    }
+
     setPointer(name) {
         const $el = this._getByName(name);
         if ($el.length === 0) { return false; }
 
-        window.keyboardController.pointTo(this, $el.get(0));
+        window.keyboardController.pointTo($el.get(0));
         return true;
     }
 
@@ -41,7 +45,7 @@ export class DirectoriesViewer {
     }
 
     getPointer() {
-        const $el = this._$el.find(`.directories__item.pointer`);
+        const $el = this._$el.find(`.directories__item.--pointer`);
         if ($el.length === 0) { return null; }
 
         return $el.data('name');
@@ -66,7 +70,7 @@ export class DirectoriesViewer {
             this._$el.append($block);
         }
 
-        window.keyboardController.addBlock(this, this._$el.find('.directories__item:not(.--home)').toArray());
+        window.keyboardController.addBlock(this);
     }
 
     _makeHead(dir) {
@@ -136,16 +140,13 @@ export class DirectoriesViewer {
         $(window).trigger('selectSection', [item.dataset.src]);
     }
 
-    onSetPointer() {
-        // do nothing
-    }
-
-
     destroy() {
-        window.keyboardController.removeBlock(this);
         this._$el.html('');
     }
 
+    getElementsSelector() {
+        return '.directories__item:not(.--home)';
+    }
 
     onKeyboardEvent(event, i, el) {
         if (event === 'enter' || event === 'dbClick') {

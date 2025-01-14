@@ -8,6 +8,7 @@ const {getFileExt} = require("./lib/tools");
 
 const winDetail = require('./lib/window/detail');
 const winFiles = require('./lib/window/files');
+const fs = require('fs');
 
 
 // todo сделать деталку синглтоном. Если открывается новая, закрывать старую
@@ -119,7 +120,6 @@ ipcMain.on('openInVlc', (event, src) => {
 })
 
 
-const fs = require('fs');
 ipcMain.on('organizeDir', (event, currentDir) => {
     const files = fs.readdirSync(currentDir);
     const names = {};

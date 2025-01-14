@@ -1,50 +1,125 @@
 import {getAbsPosition, scrollToElement} from "./tools.js";
 
+
+// controller implements:
+// getElementsSelector() : string
+// onKeyboardEvent(key, index, el, evt)
+// onSetPointer(index, el)
+
 export class KeyboardController {
-
-    #blocks = [];
-
-    #pointer = null;
-    #blockPointer = null;
-    #xCourse = 0;
-
-	#pressed = {
-		shift: false,
-		control: false,
-	};
+    _blocks = [];
+    _pointer = null;
+    _xCourse = 0;
 
     constructor() {
-        document.addEventListener('keydown', this.#onKeyboard.bind(this));
-        document.addEventListener('keyup', this.#onKeyboardUp.bind(this));
-        document.addEventListener('mousemove', this.#showCursor.bind(this));
+        document.addEventListener('keydown', this._onKeyboard.bind(this));
+        document.addEventListener('mousemove', this._showCursor.bind(this));
     }
 
-    #onKeyboard(e) {
+    addBlock(controller) {
+        let block = this._getBlock(controller);
+
+        if (block === null) {
+            block = {
+                controller: controller,
+                items: [],
+                indexes: new Map(),
+                yPos: 0,
+            }
+            this._blocks.push(block);
+        }
+
+        const pos = this._getPointerPos();
+        this._rebuildBlock(block);
+        this._fixPointer(pos);
+
+        this._blocks.sort((a, b) => a.yPos - b.yPos);
+    }
+
+    removeBlock(controller) {
+        const index = this._getBlockIndex(controller);
+        const pos = this._getPointerPos();
+
+        if (index === null) {
+            return;
+        }
+
+        for (const item of this._blocks[index].items) {
+            item.removeEventListener('click', this._onElementClick);
+            item.removeEventListener('contextmenu', this._onElementRightClick);
+        }
+
+        this._blocks.splice(index, 1);
+
+        this._fixPointer(pos);
+    }
+
+    pointTo(el) {
+        const pos = this._getElementPos(el);
+        if (pos === null) { return; }
+
+        this._setPointer(pos.block, pos.item);
+        this._updateXCourse();
+    }
+
+    clearPointer() {
+        this._pointer = null;
+        this._xCourse = 0;
+    }
+
+    getPointerIndex(controller) {
+        const i = this._getBlockIndex(controller);
+        const pos = this._getPointerPos();
+
+        if (i === null || pos === null || i !== pos.block) { return null; }
+
+        return pos.item;
+    }
+
+    _rebuildBlock(block) {
+        const items = $(block.controller.getElementsSelector()).toArray();
+        if (items.length === 0) {
+            this.removeBlock(block);
+            return;
+        }
+
+        const newItems = items.filter(item => !block.items.includes(item));
+        for (const item of newItems) {
+            item.addEventListener('click', this._onElementClick);
+            item.addEventListener('contextmenu', this._onElementRightClick);
+        }
+        block.items = items;
+        block.yPos = getAbsPosition(items[0]).top;
+
+        block.indexes = new Map();
+        for (const i in block.items) {
+            block.indexes.set(block.items[i], i);
+        }
+    }
+
+    _onKeyboard = (e) => {
         if (e.target.tagName === 'INPUT') { return; }
 
         let triggered = true;
 
-		this.#pressed.shift = e.shiftKey;
-		this.#pressed.control = e.ctrlKey;
-
         if (e.code === 'KeyD' || e.code === 'ArrowRight') {
-            this.#move('right');
+            this._move('right');
         } else if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
-            this.#move('left');
+            this._move('left');
         } else if (e.code === 'KeyW' || e.code === 'ArrowUp') {
-            this.#move('up');
+            this._move('up');
         } else if (e.code === 'KeyS' || e.code === 'ArrowDown') {
-            this.#move('down');
+            this._move('down');
         } else if (e.code === 'Home') {
-            this.#move('home');
+            this._move('home');
         } else if (e.code === 'End') {
-            this.#move('end');
+            this._move('end');
         } else if (e.code === 'Space' || e.code === 'Enter') {
-            this.#trigger('enter');
+            this._trigger('enter');
         } else if (e.key === 'Shift') {
-	        this.#trigger('shift');
+	        this._trigger('shift');
         } else if (e.key === 'Control') {
-	        this.#trigger('control');
+	        this._trigger('control');
         } else {
             triggered = false;
         }
@@ -54,111 +129,109 @@ export class KeyboardController {
         }
     }
 
-    #onKeyboardUp(e) {
-        let triggered = true;
+    _onElementClick = (e) => {
+        const el = e.currentTarget;
 
-        if (e.key === 'Shift') {
-            this.#trigger('shiftUp');
-        } else if (e.key === 'Control') {
-            this.#trigger('controlUp');
-        } else {
-            triggered = false;
-        }
-
-        if (triggered) {
-            e.preventDefault();
-        }
-    }
-
-    #onElementClick(controller, i, e) {
         if (e.detail === 1) {
-            this.pointTo(controller, i);
-            this.#trigger('click');
+            this.pointTo(el);
+            this._trigger('click');
         }
         else if (e.detail === 2) {
-            this.#trigger('dbClick');
+            this._trigger('dbClick');
         }
     }
 
-    #onElementRightClick(controller, i, e) {
-        this.pointTo(controller, i);
-        this.#trigger('rightClick', e);
+    _onElementRightClick = (e) => {
+        const el = e.currentTarget;
+
+        this.pointTo(el);
+        this._trigger('rightClick', e);
     }
 
-    #trigger(key, e = null) {
-        if (this.#blockPointer !== null) {
-            this.#blocks[this.#blockPointer].controller.onKeyboardEvent(key, this.#pointer, this.#getPointedElement(), e);
+    _trigger(key, e = null) {
+        const pos = this._getPointerPos();
+        if (pos === null) { return; }
+        this._blocks[pos.block].controller.onKeyboardEvent(key, pos.item, this._pointer, e);
+    }
+
+    _getElementPos(el) {
+        for (const i in this._blocks) {
+            if (this._blocks[i].indexes.has(el)) {
+                return {
+                    block: parseInt(i),
+                    item: parseInt(this._blocks[i].indexes.get(el)),
+                };
+            }
         }
+        return null;
     }
 
-    #move(key) {
-        this.#hideCursor();
+    _getPointerPos() {
+        return this._getElementPos(this._pointer);
+    }
 
-        if (this.#blockPointer === null) {
-            if (this.#blocks.length === 0) {
+    _move(key) {
+        this._hideCursor();
+        const pos = this._getPointerPos();
+
+        if (this._pointer === null || pos === null) {
+            if (this._blocks.length === 0) {
+                this.clearPointer();
                 return;
             } else {
-                this.#setPointer(0, 0);
+                this._setPointer(0, 0);
                 return;
             }
         }
 
+        let {block: bp, item: p} = pos;
 
-        let bp = this.#blockPointer;
-        const bMax = this.#blocks.length - 1;
-        let p = this.#pointer;
-        let max = this.#blocks[bp].items.length - 1;
+        const bMax = this._blocks.length - 1;
+        let max = this._blocks[bp].items.length - 1;
 
         if (key === 'left') {
             if (p === 0) { return; }
-            this.#setPointer(bp, p - 1);
-            this.#updateXCourse();
+            this._setPointer(bp, p - 1);
+            this._updateXCourse();
 
         } else if (key === 'right') {
             if (p === max) { return; }
-            this.#setPointer(bp, p + 1);
-            this.#updateXCourse();
+            this._setPointer(bp, p + 1);
+            this._updateXCourse();
 
         } else if (key === 'home') {
-            if (p === 0 && bp > 0) {
-                this.#setPointer(bp - 1, 0);
-            } else {
-                this.#setPointer(bp, 0);
-            }
+            this._setPointer(0, 0);
+
         } else if (key === 'end') {
-            if (p === max && bp < bMax) {
-                this.#setPointer(bp + 1, this.#blocks[bp + 1].items.length - 1);
-            } else {
-                this.#setPointer(bp, max);
-            }
+            this._setPointer(bMax, this._blocks[bMax].items.length - 1);
 
         } else if (key === 'up') {
 
-            let start = getAbsPosition(this.#blocks[bp].items[p]);
+            let start = getAbsPosition(this._blocks[bp].items[p]);
             while (true) {
                 if (p === 0 && bp === 0) { return; }
                 if (p === 0) {
                     bp--;
-                    p = this.#blocks[bp].items.length - 1;
-                    start = getAbsPosition(this.#blocks[bp].items[p]);
+                    p = this._blocks[bp].items.length - 1;
+                    start = getAbsPosition(this._blocks[bp].items[p]);
                     break;
                 }
                 p--;
-                const coords = getAbsPosition(this.#blocks[bp].items[p]);
+                const coords = getAbsPosition(this._blocks[bp].items[p]);
                 if (Math.abs(coords.top - start.top) > 5) {
                     start = coords;
                     break;
                 }
             }
 
-            const needX = this.#xCourse;
+            const needX = this._xCourse;
             let bestP = p;
             let minDist = Math.abs(needX - start.left);
 
             while (true) {
                 p--;
                 if (p < 0) { break; }
-                const pos = getAbsPosition(this.#blocks[bp].items[p]);
+                const pos = getAbsPosition(this._blocks[bp].items[p]);
                 if (Math.abs(pos.top - start.top) > 5) {
                     break;
                 }
@@ -169,36 +242,36 @@ export class KeyboardController {
                 }
             }
 
-            this.#setPointer(bp, bestP);
+            this._setPointer(bp, bestP);
 
         } else if (key === 'down') {
 
-            let start = getAbsPosition(this.#blocks[bp].items[p]);
+            let start = getAbsPosition(this._blocks[bp].items[p]);
             while (true) {
                 if (p === max && bp === bMax) { return; }
                 if (p === max) {
                     bp++;
                     p = 0;
-                    start = getAbsPosition(this.#blocks[bp].items[p]);
-                    max = this.#blocks[bp].items.length - 1;
+                    start = getAbsPosition(this._blocks[bp].items[p]);
+                    max = this._blocks[bp].items.length - 1;
                     break;
                 }
                 p++;
-                const coords = getAbsPosition(this.#blocks[bp].items[p]);
+                const coords = getAbsPosition(this._blocks[bp].items[p]);
                 if (Math.abs(coords.top - start.top) > 5) {
                     start = coords;
                     break;
                 }
             }
 
-            const needX = this.#xCourse;
+            const needX = this._xCourse;
             let bestP = p;
             let minDist = Math.abs(needX - start.left);
 
             while (true) {
                 p++;
                 if (p > max) { break; }
-                const pos = getAbsPosition(this.#blocks[bp].items[p]);
+                const pos = getAbsPosition(this._blocks[bp].items[p]);
                 if (Math.abs(pos.top - start.top) > 5) {
                     break;
                 }
@@ -209,104 +282,65 @@ export class KeyboardController {
                 }
             }
 
-            this.#setPointer(bp, bestP);
+            this._setPointer(bp, bestP);
         }
     }
 
-    #setPointer(bp, p) {
-        if (this.#blockPointer !== null && this.#pointer !== null) {
-            this.#blocks[this.#blockPointer].items[this.#pointer].classList.remove('pointer');
-            if (bp !== this.#blockPointer) {
-                this.#blocks[this.#blockPointer].controller.onSetPointer(null, null, this.#pressed);
-            }
+    _setPointer(bp, p) {
+        const pos = this._getPointerPos();
+        if (pos !== null) {
+            this._blocks[pos.block].items[pos.item].classList.remove('--pointer');
         }
-        this.#blockPointer = bp;
-        this.#pointer = p;
 
-        this.#blocks[bp].items[p].classList.add('pointer');
-        scrollToElement(this.#blocks[bp].items[p], 100);
-        this.#blocks[bp].controller.onSetPointer(p, this.#getPointedElement(), this.#pressed);
-    }
-    #updateXCourse() {
-        this.#xCourse = getAbsPosition(this.#getPointedElement()).left;
-    }
+        const block = this._blocks[bp];
+        const el = block.items[p];
+        this._pointer = el;
+        el.classList.add('--pointer');
+        scrollToElement(el, 100);
 
-    #getPointedElement() {
-        return this.#blocks[this.#blockPointer].items[this.#pointer];
+        if (typeof block.controller.onSetPointer !== 'undefined') {
+            block.controller.onSetPointer(p, el);
+        }
     }
 
-    #getElement(bp, p) {
-        return this.#blocks[bp].items[p];
+    _fixPointer(pos) {
+        if (pos === null) { return; }
+        if (this._getPointerPos() !== null) { return; }
+
+        if (this._blocks.length <= pos.block) {
+            pos.block = this._blocks.length - 1;
+            pos.item = this._blocks[pos.block].items.length - 1;
+        }
+
+        if (this._blocks[pos.block].items.length <= pos.item) {
+            pos.item = this._blocks[pos.block].items.length - 1;
+        }
+
+        this._setPointer(pos.block, pos.item);
     }
 
-    #getBlockIndex(controller) {
-        for (let i = 0; i < this.#blocks.length; i++) {
-            if (this.#blocks[i].controller === controller) {
-                return i;
+    _updateXCourse() {
+        this._xCourse = getAbsPosition(this._pointer).left;
+    }
+
+    _getBlockIndex(controller) {
+        for (const i in this._blocks) {
+            if (this._blocks[i].controller === controller) {
+                return parseInt(i);
             }
         }
         return null;
     }
 
-    #hideCursor() {
+    _getBlock(controller) {
+        const i = this._getBlockIndex(controller);
+        return i === null ? null : this._blocks[i];
+    }
+
+    _hideCursor() {
         document.body.classList.add('--hide-cursor');
     }
-    #showCursor() {
+    _showCursor = () => {
         document.body.classList.remove('--hide-cursor');
-    }
-
-    addBlock(controller, items) {
-        const block = {
-            controller: controller,
-            items: items,
-        }
-
-        const index = this.#getBlockIndex(controller);
-        if (index !== null) {
-            this.#blocks[index] = block;
-        } else {
-            this.#blocks.push(block);
-        }
-
-        for (let i = 0; i < items.length; i++) {
-            items[i].addEventListener('click', this.#onElementClick.bind(this, controller, i));
-            items[i].addEventListener('contextmenu', this.#onElementRightClick.bind(this, controller, i));
-        }
-
-        for (const block of this.#blocks) {
-            block.top = getAbsPosition(block.items[0]).top;
-        }
-
-        this.#blocks.sort((a, b) => a.top - b.top);
-    }
-
-    removeBlock(controller) {
-        const index = this.#getBlockIndex(controller);
-        if (index !== null) {
-            this.#blocks.splice(index, 1);
-        }
-        this.#pointer = null;
-        this.#blockPointer = null;
-    }
-
-    pointTo(controller, elOrIndex) {
-        const index = this.#getBlockIndex(controller);
-
-        if (index !== null) {
-            if (!Number.isInteger(elOrIndex)) {
-                elOrIndex = Array.prototype.indexOf.call(this.#blocks[index].items, elOrIndex) ?? 0;
-            }
-
-            if (index !== this.#blockPointer || elOrIndex !== this.#pointer) {
-                this.#setPointer(index, elOrIndex);
-                this.#updateXCourse();
-            }
-        }
-    }
-
-    clearPointer() {
-        this.#pointer = null;
-        this.#blockPointer = null;
-        this.#xCourse = 0;
     }
 }

@@ -41,7 +41,13 @@ class AbstractLoader {
         this._hideProgress();
         if (this._reject !== null) {
             this._reject('stop');
+            this._reject = null;
+            this._resolve = null;
         }
+    }
+
+    _isStopped() {
+        return this._resolve === null;
     }
 }
 
@@ -138,6 +144,8 @@ export class PreviewLoader extends AbstractLoader {
     }
 
     _resizeNext() {
+        if (this._isStopped()) { return; }
+
         if (this._pointerScroll !== null) {
             this._pointer = this._pointerScroll;
             this._pointerScroll = null;
@@ -147,8 +155,9 @@ export class PreviewLoader extends AbstractLoader {
             return;
         }
 
-        while (this._pointer < this._items.length && this._items[this._pointer].getFile().preview !== null)
+        while (this._pointer < this._items.length && this._items[this._pointer].getFile().preview !== null) {
             this._pointer++;
+        }
 
         if (this._pointer === this._items.length) {
             this._pointer = 0;
