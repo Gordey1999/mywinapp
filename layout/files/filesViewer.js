@@ -76,9 +76,10 @@ export class FilesController {
         this.#el.innerHTML = '';
         this.#items = [];
 
+        const $block = $(this.getContainer());
         files.forEach(file => {
             const container = $('<div class="files__item"/>');
-            $(this.getContainer()).append(container);
+            $block.append(container);
             this.#items.push(new FileItem(this, container[0], file));
         })
 

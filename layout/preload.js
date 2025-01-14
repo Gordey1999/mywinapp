@@ -14,14 +14,14 @@ function exposeApi(send, invoke, receive) {
     invoke = invoke.concat(['maximizeStatus']);
 
     contextBridge.exposeInMainWorld('api', {
-        send: (channel, data) => {
+        send: (channel, ...data) => {
             if (send.includes(channel)) {
-                ipcRenderer.send(channel, data);
+                ipcRenderer.send(channel, ...data);
             }
         },
-        invoke: (channel, data) => {
+        invoke: (channel, ...data) => {
             if (invoke.includes(channel)) {
-                return ipcRenderer.invoke(channel, data);
+                return ipcRenderer.invoke(channel, ...data);
             }
         },
         receive: (channel, func) => {

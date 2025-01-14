@@ -81,13 +81,13 @@ ipcMain.on("openIndexFiles", (event, dirPath) => {
 
 ipcMain.on('openPuzzle', (event) => {
     return;
-    const puzzle = require('./lib/window/puzzle');
-	puzzle(win);
+    // const puzzle = require('./lib/window/puzzle');
+	// puzzle(win);
 })
 ipcMain.on('openSearchCopies', (event) => {
     return;
-    const searchCopies = require('./lib/window/searchCopies');
-    searchCopies(win);
+    // const searchCopies = require('./lib/window/searchCopies');
+    // searchCopies(win);
 })
 
 ipcMain.on('openMangaMode', (event, currentDir) => {
@@ -121,6 +121,8 @@ ipcMain.on('openInVlc', (event, src) => {
 
 
 ipcMain.on('organizeDir', (event, currentDir) => {
+    return;
+
     const files = fs.readdirSync(currentDir);
     const names = {};
 

@@ -166,7 +166,7 @@ export class PreviewLoader extends AbstractLoader {
 
         const file = this._items[this._pointer].getFile();
 
-        window.api.invoke('filesMakePreview', { src: file.src, mtime: file.mtime })
+        window.api.invoke('filesMakePreview', file.src, file.mtime )
             .then(this.onMakePreview.bind(this, file.src));
     }
 
