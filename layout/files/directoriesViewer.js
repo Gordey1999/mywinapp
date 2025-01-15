@@ -25,14 +25,6 @@ export class DirectoriesViewer {
         return this._currentDir.mtime;
     }
 
-    setPointer(name) {
-        const $el = this._getByName(name);
-        if ($el.length === 0) { return false; }
-
-        window.keyboardController.pointTo($el.get(0));
-        return true;
-    }
-
     setInfo(name, info) {
         const $block = this._getByName(name);
         if ($block.length === 0) { return false; }
@@ -51,15 +43,12 @@ export class DirectoriesViewer {
         }
     }
 
-    _getByName(name) {
-        return this._$el.find(`.directories__item[data-name="${name}"]`);
+    getNode(name) {
+        return this._getByName(name)[0] ?? null;
     }
 
-    getPointer() {
-        const $el = this._$el.find(`.directories__item.--pointer`);
-        if ($el.length === 0) { return null; }
-
-        return $el.data('name');
+    _getByName(name) {
+        return this._$el.find(`.directories__item[data-name="${name}"]`);
     }
 
     _make() {
@@ -75,8 +64,6 @@ export class DirectoriesViewer {
 
             this._$el.append($block);
         }
-
-        window.keyboardController.addBlock(this);
     }
 
     _makeHead(dir) {
@@ -147,9 +134,30 @@ export class DirectoriesViewer {
         return '.directories__item:not(.--home)';
     }
 
-    onKeyboardEvent(event, i, el) {
+    onControl(event, el) {
         if (event === 'enter' || event === 'dbClick') {
             this._selectItem(el);
         }
+    }
+
+    makeContextOptions(el) {
+        const src = $(el).attr('data-src');
+        return [
+            {
+                name: 'Open in New Window',
+                callback: () => {
+                    window.api.send('openNewWindow', src);
+                },
+            },
+            {
+                type: 'separator'
+            },
+            {
+                name: 'Manga Mode',
+                callback: () => {
+                    window.api.send('openMangaMode', src);
+                },
+            }
+        ];
     }
 }

@@ -1,19 +1,18 @@
 "use strict";
 
 import {addMenuOption, setTitle} from "../assets/js/window.js";
-import {getScroll, scrollToTop, setScroll} from "../assets/js/tools.js";
-import {KeyboardController} from "../assets/js/keyboard.js";
+import {getScroll, setScroll} from "../assets/js/tools.js";
 import {DirectoriesViewer} from "./directoriesViewer.js";
 import {DirPath} from "./dirPath.js";
 import {FilesController} from "./filesViewer.js";
 import {MovementHistory} from "./history.js";
 import {DirectoryLoader, PreviewLoader} from "./indexing.js";
-
-window.keyboardController = new KeyboardController();
+import {Controls} from "./controls.js";
 
 const dirPath = new DirPath($('.dir-path'));
 const dirViewer = new DirectoriesViewer($('.directories-container'));
 const filesViewer = new FilesController($('.files-container').get(0));
+const controls = new Controls(dirViewer, filesViewer, dirPath);
 const movementHistory = new MovementHistory();
 
 window.api.invoke('filesInit').then((result) => {
@@ -27,7 +26,7 @@ window.api.receive('filesOnFocus', () => {
 
 $(window).on('selectSection', (e, src) => {
     if (dirPath.getPath() !== src) {
-        movementHistory.update(getPointer(), getScroll());
+        movementHistory.update(controls.getPointer(), getScroll());
         movementHistory.add(src);
     }
     openPath(src);
@@ -35,7 +34,7 @@ $(window).on('selectSection', (e, src) => {
 
 $(window).on('changeSort', (e, newSort) => {
     window.api.invoke('changeSort', newSort).then(() => {
-        openPath(dirPath.getPath(), getPointer(), null);
+        openPath(dirPath.getPath(), controls.getPointer(), null);
     })
 });
 
@@ -74,6 +73,7 @@ async function openPath(src, name = null, scroll = null) {
         dirViewer.setDirectories(result.dirs, result.info);
         filesViewer.updateFiles(result.files);
     }
+    controls.rebuild();
     runLoaders(result);
 
     if(name || samePath) {
@@ -85,24 +85,11 @@ async function openPath(src, name = null, scroll = null) {
 
 function gotoSelected(name = null, scroll = null) {
     if (name !== null) {
-        pointTo(name);
+        controls.pointTo(name);
     }
     if (scroll !== null) {
         setScroll(scroll);
     }
-}
-
-function pointTo(name) {
-    if (!dirViewer.setPointer(name)) {
-        filesViewer.setPointer(name);
-    }
-}
-
-function getPointer() {
-    const dirPointer = dirViewer.getPointer();
-    if (dirPointer !== null) { return dirPointer; }
-
-    return filesViewer.getPointer();
 }
 
 const directoryLoader = new DirectoryLoader();
@@ -123,7 +110,7 @@ window.api.receive('filesOpenPath', (src, name) => {
 });
 
 hotkeys('backspace, q', () => {
-    movementHistory.update(getPointer(), getScroll());
+    movementHistory.update(controls.getPointer(), getScroll());
     const prev = movementHistory.prev();
     if (prev !== null) {
         openPath(prev.src, prev.pointTo, prev.scroll);
@@ -131,7 +118,7 @@ hotkeys('backspace, q', () => {
 });
 
 hotkeys('=, e', () => {
-    movementHistory.update(getPointer(), getScroll());
+    movementHistory.update(controls.getPointer(), getScroll());
     const next = movementHistory.next();
     if (next !== null) {
         openPath(next.src, next.pointTo, next.scroll);

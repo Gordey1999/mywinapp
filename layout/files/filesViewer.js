@@ -78,12 +78,10 @@ export class FilesController {
 
         const $block = $(this.getContainer());
         files.forEach(file => {
-            const container = $('<div class="files__item"/>');
+            const container = this._createElement(file);
             $block.append(container);
             this.#items.push(new FileItem(this, container[0], file));
         })
-
-        window.keyboardController.addBlock(this);
     }
 
     updateFiles(files) {
@@ -112,12 +110,13 @@ export class FilesController {
             if (file.id === oldFile?.id) {
                 if (oldFile.mtime !== file.mtime) {
                     oldFile.preview = null;
+                    oldFile.mtime = file.mtime;
                 }
                 updatedItems.push(item);
                 index++;
                 item = this.#items[index];
             } else {
-                const container = $('<div class="files__item"/>');
+                const container = this._createElement(file);
                 if (item) {
                     container.insertBefore(item.getElement());
                 } else {
@@ -128,8 +127,12 @@ export class FilesController {
         }
 
         this.#items = updatedItems;
+    }
 
-        window.keyboardController.addBlock(this);
+    _createElement(file) {
+        const container = $('<div class="files__item"/>');
+        container[0].dataset.name = file.name;
+        return container;
     }
 
     setSort(sort) {
@@ -148,13 +151,11 @@ export class FilesController {
         return '.files__item';
     }
 
-    onKeyboardEvent(event, i, el, evt) {
-        if (event === 'enter') {
-            this.openDetail(this.#items[i].getFile().id);
-        } else if (event === 'dbClick') {
-            this.openDetail(this.#items[i].getFile().id);
-        } else if (event === 'rightClick') {
-            this.#makeContextMenu(evt);
+    onControl(event, el) {
+        if (event === 'enter' || event === 'dbClick') {
+            this.openDetail(el.dataset.name);
+        } else if (event === 'select') {
+            setTitle(el.dataset.name);
         }
     }
 
@@ -162,43 +163,25 @@ export class FilesController {
         window.api.send('openDetail', id);
     }
 
-    onSetPointer(i, el) {
-        setTitle(this.#items[i].getFile().name);
+    getNode(name) {
+        return this.getByName(name)?.getElement() ?? null;
     }
 
-    setPointer(id) {
-        let item = this._getById(id);
-        if (item === null) { return; }
-
-        window.keyboardController.pointTo(item.getElement());
-    }
-
-    _getById(id) {
+    getByName(name) {
         for (const item of this.#items) {
-            if (item.getFile().id === id) {
+            if (item.getFile().name === name) {
                 return item;
             }
         }
         return null;
     }
 
-    _getSelected() {
-        const i = window.keyboardController.getPointerIndex(this);
-        if (i === null) { return null; }
-
-        return this.#items[i];
-    }
-
-    getPointer() {
-        return this._getSelected()?.getFile()?.id ?? null;
-    }
-
     getContainer() {
         return this.#el;
     }
 
-    #makeContextMenu(evt) {
-        const selected = this._getSelected();
+    makeContextOptions(el) {
+        const selected = this.getByName(el.dataset.name);
 
         const innerList = {
             name: 'Woooow',
@@ -239,20 +222,9 @@ export class FilesController {
             }
         }
 
-
-        const menu = [
-            {
-                name: 'Open in Explorer',
-                icon: 'explorer',
-                callback: () => {
-                    window.api.send('openInExplorer', selectedFile.src);
-                },
-            },
+        return [
             edit,
             innerList,
-            {
-                name: 'Mark...'
-            },
             {
                 name: 'Sort...',
                 children: this._makeSortContext()
@@ -286,22 +258,7 @@ export class FilesController {
                     }
                 ]
             },
-            { type: 'separator' },
-            {
-                name: 'Copy',
-                icon: 'copy',
-            },
-            {
-                name: 'Paste',
-                icon: 'paste',
-            },
-            {
-                name: 'Delete',
-                icon: 'delete',
-            }
         ];
-
-        makeContextMenu(menu, evt.x, evt.y);
     }
 
     _makeSortContext() {

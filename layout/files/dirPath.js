@@ -25,6 +25,10 @@ export class DirPath {
         return this._path;
     }
 
+    getFullPath(name) {
+        return this._path + this._separator + name;
+    }
+
     _make() {
         this._$container.html('');
 
