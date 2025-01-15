@@ -38,6 +38,10 @@ $(window).on('changeSort', (e, newSort) => {
     })
 });
 
+export function updateFilesContents() {
+    return openPath(dirPath.getPath());
+}
+
 async function openPath(src, name = null, scroll = null) {
     const samePath = dirPath.getPath() === src;
     let fullRedraw = true;

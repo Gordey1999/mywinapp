@@ -1,6 +1,5 @@
 import {createNode} from "../assets/js/tools.js";
 import {setTitle} from "../assets/js/window.js";
-import {makeContextMenu} from "../assets/js/contextMenu.js";
 
 let itemsInRow = 9;
 
@@ -167,13 +166,14 @@ export class FilesController {
         return this.getByName(name)?.getElement() ?? null;
     }
 
+    getNodes(names) {
+        return this.#items
+            .filter((item) => names.includes(item.getFile().name))
+            .map((item) => item.getElement());
+    }
+
     getByName(name) {
-        for (const item of this.#items) {
-            if (item.getFile().name === name) {
-                return item;
-            }
-        }
-        return null;
+        return this.#items.find((item) => item.getFile().name === name) ?? null;
     }
 
     getContainer() {

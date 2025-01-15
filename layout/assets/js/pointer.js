@@ -166,7 +166,12 @@ export class PointerController {
         if (pos === null) { return; }
         if (this.getPointerPos() !== null) { return; }
 
-        if (this._items.length <= pos.item) {
+        if (this._items.length === 0) {
+            this.clearPointer();
+            return;
+        }
+
+        if (this._items.length <= pos) {
             pos = this._items.length - 1;
         }
 

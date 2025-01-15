@@ -39,6 +39,14 @@ body {
     border-radius: var(--border-radius-m);
     box-sizing: border-box;
 }
+.files__item.--select {
+    background: var(--color-accent);
+}
+.files__item.--select .files__item-img {
+    width: 70%;
+    height: 70%;
+    margin: auto;
+}
 .files__item.--pointer {
     outline: 2px solid #ffffff;
 }
@@ -52,6 +60,7 @@ body {
     object-fit: cover;
     border-radius: var(--border-radius-m);
     transition: all 0.5s;
+    margin: auto;
 }
 
 
@@ -83,6 +92,12 @@ body {
     border-color: white;
     color: var(--text-color-accent);
     stroke: var(--text-color-accent);
+}
+
+.directories__item.--select {
+    color: var(--text-color-accent);
+    stroke: var(--text-color-accent);
+    background: var(--color-accent);
 }
 
 .directories__item-info {

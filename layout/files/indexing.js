@@ -60,7 +60,7 @@ export class DirectoryLoader extends AbstractLoader {
     start(dirs, dirViewer) {
         const promise = this._start();
 
-        this._dirs = dirs.reverse();
+        this._dirs = dirs.slice().reverse();
         this._dirsCount = dirs.length;
         this._dirViewer = dirViewer;
 

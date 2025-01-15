@@ -2,6 +2,8 @@
 
 import {PointerController} from "../assets/js/pointer.js";
 import {makeContextMenu} from "../assets/js/contextMenu.js";
+import {Selector} from "./selector.js";
+import {updateFilesContents} from "./renderer.js";
 
 // getElementsSelector, getNode, onTrigger
 
@@ -10,9 +12,11 @@ export class Controls {
     _dirViewer = null;
     _filesViewer = null;
     _dirPath = null
+    _selector = null;
 
     constructor(dirViewer, filesViewer, dirPath) {
         this._pointer = new PointerController();
+        this._selector = new Selector(this._pointer);
         this._dirViewer = dirViewer;
         this._filesViewer = filesViewer;
         this._dirPath = dirPath;
@@ -21,6 +25,10 @@ export class Controls {
         document.addEventListener('mousemove', this._showCursor);
 
         hotkeys('Space, Enter', this._onEnter);
+        hotkeys('ctrl+x', this._onCut);
+        hotkeys('ctrl+c', this._onCopy);
+        hotkeys('ctrl+v', this._onPaste);
+        hotkeys('delete', this._onDelete);
     }
 
     rebuild() {
@@ -46,17 +54,17 @@ export class Controls {
         let triggered = true;
 
         if (e.code === 'KeyD' || e.code === 'ArrowRight') {
-            this._move('right');
+            this._move('right', e);
         } else if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
-            this._move('left');
+            this._move('left', e);
         } else if (e.code === 'KeyW' || e.code === 'ArrowUp') {
-            this._move('up');
+            this._move('up', e);
         } else if (e.code === 'KeyS' || e.code === 'ArrowDown') {
-            this._move('down');
+            this._move('down', e);
         } else if (e.code === 'Home') {
-            this._move('home');
+            this._move('home', e);
         } else if (e.code === 'End') {
-            this._move('end');
+            this._move('end', e);
         } else {
             triggered = false;
         }
@@ -70,6 +78,7 @@ export class Controls {
         this._hideCursor();
         this._pointer.move(direction);
         this._trigger('select');
+        this._selector.move(e);
     }
 
     _onEnter = (e) => {
@@ -81,6 +90,7 @@ export class Controls {
         const el = e.currentTarget;
         this._pointer.pointTo(el);
         this._trigger('select');
+        this._selector.move(e);
 
         if (e.detail === 2) {
             this._trigger('dbClick');
@@ -124,6 +134,7 @@ export class Controls {
         if (el !== null) {
             this._pointer.pointTo(el);
             this._trigger('select');
+            this._selector.move();
         }
     }
 
@@ -131,6 +142,55 @@ export class Controls {
         const node = this._pointer.getPointer();
 
         return node.dataset.name;
+    }
+
+    _onCut = () => {
+        const selected = this._selector.getSelected();
+        if (selected.length === 0) { return; }
+
+        window.api.send('filesCut', this._dirPath.getPath(), selected);
+    }
+
+    _onCopy = () => {
+        const selected = this._selector.getSelected();
+        if (selected.length === 0) { return; }
+
+        window.api.send('filesCopy', this._dirPath.getPath(), selected);
+    }
+
+    _onPaste = async () => {
+        const res = await window.api.invoke('filesPaste', this._dirPath.getPath());
+
+        if (res === null) { return; }
+        if (res.error) { alert(res.error); return; }
+
+        await updateFilesContents();
+
+        const select = this._filesViewer.getNodes(res.files);
+
+        for (const name of res.dirs) {
+            const dir = this._dirViewer.getNode(name);
+            if (dir !== null) { select.push(dir); }
+        }
+
+        this._selector.set(select);
+        this._pointToLast(select);
+    }
+
+    _onDelete = async () => {
+        const selected = this._selector.getSelected();
+        if (selected.length === 0) { return; }
+
+        const res = await window.api.invoke('filesDelete', this._dirPath.getPath(), selected);
+        if (res.error) { alert(res.error); return; }
+
+        await updateFilesContents();
+    }
+
+    _pointToLast(select) {
+        const result = select.map((el) => [el, this._pointer.getElementPos(el)]);
+        result.sort((a, b) => b[1] - a[1]);
+        this._pointer.pointTo(result[0][0]);
     }
 
     _makeContext(el) {
@@ -157,14 +217,17 @@ export class Controls {
             {
                 name: 'Copy',
                 icon: 'copy',
+                callback: this._onCopy,
             },
             {
                 name: 'Paste',
                 icon: 'paste',
+                callback: this._onPaste,
             },
             {
                 name: 'Delete',
                 icon: 'delete',
+                callback: this._onDelete,
             }
         ]);
     }
