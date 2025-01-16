@@ -4,7 +4,7 @@ const { exec } = require("child_process")
 const settings = require('./lib/settings');
 
 //const db = require('./lib/db');
-const {getFileExt} = require("./lib/tools");
+const {getFileType} = require("./lib/tools");
 
 const winDetail = require('./lib/window/detail');
 const winFiles = require('./lib/window/files');
@@ -58,7 +58,7 @@ function openFile(file) {
 
 function getSelectedFile(args) {
     for (const arg of args) {
-        if (getFileExt(arg)) {
+        if (getFileType(arg)) {
             return arg;
         }
     }

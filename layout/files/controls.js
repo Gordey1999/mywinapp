@@ -191,6 +191,7 @@ export class Controls {
         const result = select.map((el) => [el, this._pointer.getElementPos(el)]);
         result.sort((a, b) => b[1] - a[1]);
         this._pointer.pointTo(result[0][0]);
+        this._trigger('select');
     }
 
     _makeContext(el) {

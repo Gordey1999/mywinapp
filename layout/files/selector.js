@@ -102,10 +102,11 @@ export class Selector {
 
     getSelected() {
         if (this._select.length === 0) {
-            return this._cursor === null ? [] : [ this._cursor.dataset.name ];
+            const pointed = this._pointer.getPointer();
+            return (pointed === null || pointed.dataset.name === '..') ? [] : [ pointed.dataset.name ];
         }
 
-        return this._select.map(item => item.dataset.name);
+        return this._select.map(item => item.dataset.name).filter(item => item !== '..');
     }
 }
 
