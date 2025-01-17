@@ -351,6 +351,9 @@ window.api.receive('detailInitResult', (files, selectedId) => {
                 currentLoaded = true;
                 itemController.setItem(video, video.videoWidth, video.videoHeight, saveScale);
             };
+            video.onerror = () => {
+                showError(img);
+            }
         } else {
             if (video !== null) {
                 video.remove();
@@ -358,13 +361,27 @@ window.api.receive('detailInitResult', (files, selectedId) => {
                 video = null;
             }
             img.src = file.src;
+            img.classList.remove('--error');
 
             img.onload = () => {
                 fillMenuData(img.naturalWidth, img.naturalHeight);
                 currentLoaded = true;
                 itemController.setItem(img, img.naturalWidth, img.naturalHeight, saveScale);
             };
+            img.onerror = () => {
+                showError(img);
+            }
         }
+    }
+
+    function showError(img) {
+        if (video !== null) {
+            video.remove();
+        }
+        img.style.display = 'block';
+        img.classList.add('--error');
+        img.src = '../assets/img/image_error.png';
+        currentLoaded = true;
     }
 
     function fillMenuData(width, height) {

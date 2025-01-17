@@ -45,6 +45,10 @@ body.border-rounded {
     object-fit: contain;
 }
 
+.item img.--error {
+    object-fit: none;
+}
+
 html ::-webkit-scrollbar {
     width: 0;
     height: 0;
