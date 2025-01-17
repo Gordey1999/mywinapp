@@ -10,7 +10,7 @@ function exposeInMainWorld(send, invoke, receive, dirname) {
 module.exports = { exposeInMainWorld };
 
 function exposeApi(send, invoke, receive) {
-    send = send.concat(['close', 'maximize', 'minimize']);
+    send = send.concat(['close', 'maximize', 'minimize', 'exit']);
     invoke = invoke.concat(['maximizeStatus']);
 
     contextBridge.exposeInMainWorld('api', {

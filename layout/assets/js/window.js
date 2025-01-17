@@ -20,11 +20,16 @@ class Menu {
         this.#bind();
     }
 
-    addMenuItem(name, callback) {
+    addMenuItem(name, callback, sort = 500) {
         this._items.push({
             name: name,
-            callback: callback
+            callback: callback,
+            sort: sort,
         });
+    }
+
+    addItems(items) {
+        this._items = this._items.concat(items);
     }
 
     #bind() {
@@ -37,6 +42,11 @@ class Menu {
         }
         this._$menuBtn.addClass('--active');
         const rect = this._$menuBtn.get(0).getBoundingClientRect();
+
+        this._items.sort((a, b) => a.sort - b.sort);
+        if (this._items[0].type === 'separator') {
+            this._items = this._items.slice(1);
+        }
 
         makeContextMenu(this._items, rect.left, rect.bottom, 'header', () => {
             this._$menuBtn.removeClass('--active');
@@ -56,8 +66,10 @@ function initWindow() {
 		makeBarSettings();
 	} else {
 		makeBar();
-        chooseTheme();
 		createScrollbar($content[0]);
+
+        menu && chooseTheme();
+        menu && makeMenuOptions();
 	}
 }
 
@@ -89,10 +101,43 @@ function makeBar() {
 }
 
 function chooseTheme() {
-    const h = parseInt((Math.random() * 360));
+    const h = parseInt((Math.random() * 10)) * 22.5;
     const hsl = `hsl(${h}deg 52% 29% / 78%)`;
-
     $('body').css("--color-accent", hsl);
+
+    const themes = [];
+    for (let i = 0; i < 16; i++) {
+        themes.push({
+            name: '' + i,
+            hover: () => {
+                const hsl = `hsl(${i * 22.5}deg 52% 29% / 78%)`;
+                $('body').css("--color-accent", hsl);
+            },
+            callback: () => {}
+        });
+    }
+
+    menu.addItems([
+        {
+            name: 'Theme',
+            children: themes,
+            sort: 1100,
+        }
+    ]);
+}
+
+function makeMenuOptions() {
+    menu.addItems([
+        {
+            type: 'separator',
+            sort: 1000,
+        },
+        {
+            name: 'Exit',
+            sort: 2000,
+            callback: () => window.api.send('exit'),
+        }
+    ]);
 }
 
 function makeBarSettings() {

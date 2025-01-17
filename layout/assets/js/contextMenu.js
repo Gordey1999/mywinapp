@@ -146,6 +146,9 @@ class ContextMenuList {
             this._active.mouseX = e.screenX;
             this._active.mouseY = e.screenY;
         }
+        if (item?.hover) {
+            item?.hover(item);
+        }
     }
 
     _onMouseLeave(e) {
