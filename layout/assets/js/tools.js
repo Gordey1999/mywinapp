@@ -45,6 +45,20 @@ export function setScroll(scroll) {
     contentContainer.scrollTo(0, scroll);
 }
 
+export function scrollByMouse(e, offset = 200, scrollStep = 30) {
+    const containerView = contentContainer.getBoundingClientRect();
+    const scroll = contentContainer.scrollTop;
+
+    const topOffset = containerView.top + offset;
+    const bottomOffset =  containerView.bottom - offset;
+
+    if (e.clientY < topOffset) {
+        contentContainer.scrollTo(0, scroll - scrollStep);
+    } else if (e.clientY > bottomOffset) {
+        contentContainer.scrollTo(0, scroll + scrollStep);
+    }
+}
+
 export function scrollToTop() {
     contentContainer.scrollTo(0, 0);
 }

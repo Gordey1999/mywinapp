@@ -101,7 +101,6 @@ ipcMain.on('openFrameMode', (event, src) => {
 })
 
 ipcMain.on('openNewWindow', (event, src) => {
-    const mangaMode = require('./lib/window/mangaMode');
     winFiles.open(src);
 });
 

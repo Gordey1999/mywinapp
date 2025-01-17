@@ -4,44 +4,53 @@ import {PointerController} from "../assets/js/pointer.js";
 import {makeContextMenu} from "../assets/js/contextMenu.js";
 import {Selector} from "./selector.js";
 import {updateFilesContents} from "./renderer.js";
+import {scrollByMouse} from "../assets/js/tools.js";
 
 // getElementsSelector, getNode, onTrigger
 
 export class Controls {
+    _container = null;
     _pointer = null;
+    _selector = null;
+
     _dirViewer = null;
     _filesViewer = null;
     _dirPath = null
-    _selector = null;
 
-    constructor(dirViewer, filesViewer, dirPath) {
+    _dragoverDir = null;
+
+    constructor(container, dirViewer, filesViewer, dirPath) {
+        this._container = container;
         this._pointer = new PointerController();
         this._selector = new Selector(this._pointer);
         this._dirViewer = dirViewer;
         this._filesViewer = filesViewer;
         this._dirPath = dirPath;
 
+        this._bind();
+    }
+
+    rebuild() {
+        const items = $(this._itemsSelector()).toArray();
+        this._pointer.rebuild(items);
+    }
+
+    _bind() {
         document.addEventListener('keydown', this._onKeyboard);
-        document.addEventListener('mousemove', this._showCursor);
+        this._container.addEventListener('mousemove', this._showCursor);
+        this._container.addEventListener('click', this._onClick);
+        this._container.addEventListener('contextmenu', this._onRightClick);
+
+        this._container.addEventListener('dragstart', this._onDragStart);
+        $(this._container).on('dragenter dragleave', this._onDragPrevent);
+        $(this._container).on('dragover', this._onDragover);
+        $(this._container).on('drop dragdrop', this._onDrop);
 
         hotkeys('Space, Enter', this._onEnter);
         hotkeys('ctrl+x', this._onCut);
         hotkeys('ctrl+c', this._onCopy);
         hotkeys('ctrl+v', this._onPaste);
         hotkeys('delete', this._onDelete);
-    }
-
-    rebuild() {
-        const items = $(this._itemsSelector()).toArray();
-
-        const oldItems = this._pointer.getItems();
-        const newItems = items.filter(item => !oldItems.includes(item));
-        for (const item of newItems) {
-            item.addEventListener('click', this._onItemClick);
-            item.addEventListener('contextmenu', this._onItemRightClick);
-        }
-
-        this._pointer.rebuild(items);
     }
 
     _itemsSelector() {
@@ -86,8 +95,10 @@ export class Controls {
         this._trigger('enter');
     }
 
-    _onItemClick = (e) => {
-        const el = e.currentTarget;
+    _onClick = (e) => {
+        const el = e.target.closest(this._itemsSelector());
+        if (el === null) { return; }
+
         this._pointer.pointTo(el);
         this._trigger('select');
         this._selector.move(e);
@@ -97,8 +108,13 @@ export class Controls {
         }
     }
 
-    _onItemRightClick = (e) => {
-        const el = e.currentTarget;
+    _onRightClick = (e) => {
+        const el = e.target.closest(this._itemsSelector());
+        if (el === null) {
+            makeContextMenu([this._makePasteContext()], e.x, e.y);
+            return;
+        }
+
         this._pointer.pointTo(el);
         this._trigger('select');
 
@@ -161,20 +177,7 @@ export class Controls {
     _onPaste = async () => {
         const res = await window.api.invoke('filesPaste', this._dirPath.getPath());
 
-        if (res === null) { return; }
-        if (res.error) { alert(res.error); return; }
-
-        await updateFilesContents();
-
-        const select = this._filesViewer.getNodes(res.files);
-
-        for (const name of res.dirs) {
-            const dir = this._dirViewer.getNode(name);
-            if (dir !== null) { select.push(dir); }
-        }
-
-        this._selector.set(select);
-        this._pointToLast(select);
+        await this._afterPaste(res);
     }
 
     _onDelete = async () => {
@@ -187,11 +190,104 @@ export class Controls {
         await updateFilesContents();
     }
 
+    _onDragStart = (e) => {
+        e.preventDefault();
+        let selected = this._selector.getSelected();
+        const item = $(e.target).closest(this._itemsSelector())[0];
+        if (!item) { return; }
+
+        if (!selected.includes(item.dataset.name)) {
+            this.pointTo(item.dataset.name);
+            this._selector.set([item]);
+            selected = this._selector.getSelected();
+        }
+
+        window.api.send('filesDragStart', this._dirPath.getPath(), selected);
+    }
+
+    _onDragPrevent = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        this._clearDragoverDir();
+    }
+
+    _onDragover = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const dir = e.originalEvent.target.closest(this._dirViewer.getElementsSelector());
+
+        if (dir === null) {
+            this._clearDragoverDir();
+        } else if (this._dragoverDir !== dir) {
+            this._clearDragoverDir();
+            dir.classList.add('--dragover');
+            this._dragoverDir = dir;
+        }
+
+        scrollByMouse(e.originalEvent);
+    }
+
+    _clearDragoverDir() {
+        this._dragoverDir?.classList.remove('--dragover');
+        this._dragoverDir = null;
+    }
+
+    _onDrop = async (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const fileInput = e.originalEvent.dataTransfer.files;
+        const files = [];
+        for (let i = 0; i < fileInput.length; i++) {
+            files.push(fileInput.item(i).path);
+        }
+        if (files.length === 0) { return; }
+
+        let toDir = this._dirPath.getPath();
+        if (this._dragoverDir) {
+            toDir = this._dragoverDir.dataset.src;
+        }
+        
+        const res = await window.api.invoke('filesDrop', toDir, files);
+        await this._afterPaste(res);
+    }
+
+    async _afterPaste(res) {
+        if (res === null) { return; }
+        if (res.error) { alert(res.error); return; }
+
+        await updateFilesContents();
+        
+        if (this._dragoverDir) {
+            this.pointTo(this._dragoverDir.dataset.name);
+            this._clearDragoverDir();
+        } else {
+            const select = this._filesViewer.getNodes(res.files);
+
+            for (const name of res.dirs) {
+                const dir = this._dirViewer.getNode(name);
+                if (dir !== null) { select.push(dir); }
+            }
+
+            this._selector.set(select);
+            this._pointToLast(select);
+        }
+    }
+
     _pointToLast(select) {
         const result = select.map((el) => [el, this._pointer.getElementPos(el)]);
         result.sort((a, b) => b[1] - a[1]);
         this._pointer.pointTo(result[0][0]);
         this._trigger('select');
+    }
+
+    _makePasteContext() {
+        return {
+            name: 'Paste',
+            icon: 'paste',
+            callback: this._onPaste,
+        };
     }
 
     _makeContext(el) {
@@ -221,10 +317,11 @@ export class Controls {
                 callback: this._onCopy,
             },
             {
-                name: 'Paste',
-                icon: 'paste',
-                callback: this._onPaste,
+                name: 'Cut',
+                icon: 'cut',
+                callback: this._onCut,
             },
+            this._makePasteContext(),
             {
                 name: 'Delete',
                 icon: 'delete',

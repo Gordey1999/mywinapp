@@ -4,12 +4,12 @@ exposeInMainWorld(
     [
         'openDetail', 'organizeDir', 'openIndexFiles', 'openPuzzle', 'openSearchCopies', 'openMangaMode', 'openNewWindow',
         'openFrameMode', 'openFramePuzzle', 'openFramePuzzleSettings', 'openInExplorer', 'openInPaint', 'openInVlc', 'onDragStart',
-        'filesCut', 'filesCopy',
+        'filesCut', 'filesCopy', 'filesDragStart',
     ],
     [
         'filesInit', 'filesItemList', 'filesMakePreview', 'filesDirectoryInfo',
         'filesIndexStep', 'dirPathList', 'changeSort', 'filesCheckUpdated',
-        'filesPaste', 'filesDelete',
+        'filesPaste', 'filesDelete', 'filesDrop',
     ],
     [
         'filesOnFocus',

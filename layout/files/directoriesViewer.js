@@ -55,7 +55,7 @@ export class DirectoriesViewer {
         this._$el.append(this._makeHead(this._currentDir));
 
         for (const dir of this._dirList) {
-            const $block = $('<div>').addClass('directories__item').css('order', 10);
+            const $block = $('<div class="directories__item" draggable="true">').css('order', 10);
 
             $block.append(this._makeInfo(dir));
 

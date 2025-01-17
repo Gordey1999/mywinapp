@@ -12,7 +12,7 @@ import {Controls} from "./controls.js";
 const dirPath = new DirPath($('.dir-path'));
 const dirViewer = new DirectoriesViewer($('.directories-container'));
 const filesViewer = new FilesController($('.files-container').get(0));
-const controls = new Controls(dirViewer, filesViewer, dirPath);
+const controls = new Controls($('.content')[0], dirViewer, filesViewer, dirPath);
 const movementHistory = new MovementHistory();
 
 window.api.invoke('filesInit').then((result) => {

@@ -40,6 +40,7 @@ export class FileItem {
             }
 
             this.#img.loading = 'lazy';
+            this.#img.draggable = false;
         }
     }
 
@@ -129,7 +130,7 @@ export class FilesController {
     }
 
     _createElement(file) {
-        const container = $('<div class="files__item"/>');
+        const container = $('<div class="files__item" draggable="true">');
         container[0].dataset.name = file.name;
         return container;
     }

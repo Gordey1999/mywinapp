@@ -12,6 +12,7 @@ const icons = {
     puzzle: [ 16, '<path d="M 3 14 V 4 H 6 V 1 H 9 V 4 H 13 V 8 H 10 V 11 H 13 V 14 H 3 V 11" stroke-width="1px" fill="none"/>' ],
     copy: [ 16, '<path d="M 3 14 V 4 H 11 V 14 H 3 V 13 M 5 4 V 2 H 13 V 12 H 11" stroke-width="1px"  fill="none"/>' ],
     copy2: [ 16, '<path d="M 3 14 V 6 L 5 4 H 11 V 14 H 3 V 13 M 6 3 7 2 H 13 V 12 H 11" stroke-width="1px"  fill="none"/>' ],
+    cut: [ 16, '<path d="M 4 2 l 8 12 l 2 -2 l -3 -4 l -2 2 M 12 2 l -8 12 l -2 -2 l 3 -4 l 2 2" stroke-width="1px" fill="none" />' ],
     paste: [ 16, '<path d="M 3 14 v -12 h 10 v 12 h -10 v -1 M 6 2 v 2 h 4 v -2" stroke-width="1px" fill="none" />' ],
     delete: [ 16, '<path d="M 2 3 H 14 M 4 3 L 5 14 H 11 L 12 3 M 7 3 V 2 H 9 V 3" stroke-width="1px" fill="none"/>' ],
     file: [ 16, '<path d="M 4 13 v -10 h 6 l 2 2 v 8 h -8 v -1 M 6 7 h 4 M 6 10 h 4" stroke-width="1px"  fill="none"/>' ],
