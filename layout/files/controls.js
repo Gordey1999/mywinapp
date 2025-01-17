@@ -115,10 +115,14 @@ export class Controls {
             return;
         }
 
-        this._pointer.pointTo(el);
-        this._trigger('select');
-
         if (el.dataset.name === '..') { return null; }
+
+        if (this._selector.has(el)) {
+            this._pointer.pointTo(el);
+            this._trigger('select');
+        } else {
+            this.pointTo(el.dataset.name);
+        }
 
         makeContextMenu(this._makeContext(el), e.x, e.y);
     }

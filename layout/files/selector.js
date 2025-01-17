@@ -34,6 +34,10 @@ export class Selector {
         this._add(elements);
     }
 
+    has(element) {
+        return this._select.includes(element);
+    }
+
     _selectShift() {
         const from = this._cursor;
         const to = this._pointer.getPointer();
