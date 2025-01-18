@@ -321,6 +321,28 @@ window.api.receive('detailInitResult', (files, selectedId) => {
         } else if (e.code === 'Escape' || e.code === 'Enter') {
             e.preventDefault();
             window.api.send('closeDetail', files[index].id);
+        } else if (e.code === 'Delete') {
+            if (!currentLoaded) { return; }
+
+            window.api.invoke('delete', files[index].src).then((res) => {
+                if (res === null) { return; }
+                if (res.error) {
+                    alert(res.error);
+                    return;
+                }
+
+                files.splice(index, 1);
+                if (files.length === 0) {
+                    window.api.send('closeDetail', null);
+                    return;
+                }
+
+                if (index > files.length - 1) {
+                    index--;
+                }
+                console.log(files);
+                showFile(files[index]);
+            });
         }
     });
 

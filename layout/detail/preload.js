@@ -6,7 +6,7 @@ exposeInMainWorld(
         'detailInit', 'closeDetail', 'openInExplorer'
     ],
     [
-
+        'delete',
     ],
     [
         'detailInitResult'
