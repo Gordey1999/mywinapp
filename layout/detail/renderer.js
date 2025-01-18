@@ -340,7 +340,6 @@ window.api.receive('detailInitResult', (files, selectedId) => {
                 if (index > files.length - 1) {
                     index--;
                 }
-                console.log(files);
                 showFile(files[index]);
             });
         }

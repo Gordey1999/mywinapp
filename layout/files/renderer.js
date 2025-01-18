@@ -42,7 +42,20 @@ export function updateFilesContents() {
     return openPath(dirPath.getPath());
 }
 
-async function openPath(src, name = null, scroll = null) {
+let lastTask = Promise.resolve();
+function openPath(src, name = null, scroll = null) {
+    let nextTask = new Promise((resolve) => {
+        lastTask.then(() => {
+            openPathTask(src, name, scroll).then(() => {
+                resolve();
+            });
+        })
+    });
+    lastTask = nextTask;
+    return nextTask;
+}
+
+async function openPathTask(src, name = null, scroll = null) {
     const samePath = dirPath.getPath() === src;
     let fullRedraw = true;
 
